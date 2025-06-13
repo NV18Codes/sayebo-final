@@ -1,8 +1,9 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -12,11 +13,19 @@ const Register = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    accountType: 'buyer'
+    accountType: 'buyer' as 'buyer' | 'seller'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { signUp, user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
@@ -35,12 +44,19 @@ const Register = () => {
 
     setLoading(true);
     
-    // Simulate registration process
-    setTimeout(() => {
-      console.log('Registration attempt:', formData);
-      setLoading(false);
-      // In real app, this would create account with Supabase
-    }, 1000);
+    const { error } = await signUp(
+      formData.email, 
+      formData.password, 
+      formData.firstName, 
+      formData.lastName,
+      formData.accountType
+    );
+    
+    if (!error) {
+      navigate('/');
+    }
+    
+    setLoading(false);
   };
 
   return (

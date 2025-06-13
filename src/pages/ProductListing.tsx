@@ -4,85 +4,63 @@ import { useParams } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { ProductCard } from '../components/ProductCard';
 import { Filter, Grid, List } from 'lucide-react';
+import { supabase } from '../integrations/supabase/client';
 
-// Mock products with South African market focus and ZAR pricing
-const mockProducts = [
-  {
-    id: 1,
-    name: 'African Print Dress',
-    price: 899,
-    image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=500&h=600&fit=crop',
-    category: 'Dresses',
-    rating: 4.5,
-    reviews: 127
-  },
-  {
-    id: 2,
-    name: 'Boho Chic Blouse',
-    price: 549,
-    image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&h=600&fit=crop',
-    category: 'Tops',
-    rating: 4.2,
-    reviews: 89
-  },
-  {
-    id: 3,
-    name: 'Summer Maxi Dress',
-    price: 1299,
-    image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=500&h=600&fit=crop',
-    category: 'Dresses',
-    rating: 4.8,
-    reviews: 203
-  },
-  {
-    id: 4,
-    name: 'Floral Kaftan',
-    price: 749,
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=500&h=600&fit=crop',
-    category: 'Traditional',
-    rating: 4.3,
-    reviews: 156
-  },
-  {
-    id: 5,
-    name: 'Designer Wrap Dress',
-    price: 1899,
-    image: 'https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?w=500&h=600&fit=crop',
-    category: 'Formal',
-    rating: 4.9,
-    reviews: 78
-  },
-  {
-    id: 6,
-    name: 'Cotton Palazzo Set',
-    price: 899,
-    image: 'https://images.unsplash.com/photo-1485833077593-4278bba3f11f?w=500&h=600&fit=crop',
-    category: 'Sets',
-    rating: 4.4,
-    reviews: 112
-  }
-];
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+  image_url: string;
+  category: string;
+  stock: number;
+}
 
 const ProductListing = () => {
   const { category } = useParams();
-  const [products, setProducts] = useState(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState('name');
+  const [sortBy, setSortBy] = useState('title');
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('products')
+        .select('*')
+        .gt('stock', 0);
+
+      if (category) {
+        const categoryName = category.replace('-', ' ');
+        query = query.ilike('category', `%${categoryName}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Filter products by category if specified
-    let filteredProducts = mockProducts;
-    if (category) {
-      const categoryName = category.replace('-', ' ');
-      filteredProducts = mockProducts.filter(product => 
-        product.category.toLowerCase().includes(categoryName.toLowerCase())
-      );
-    }
-    
-    setProducts(filteredProducts);
-    setTimeout(() => setLoading(false), 800);
+    fetchProducts();
   }, [category]);
+
+  const sortedProducts = [...products].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'title':
+      default:
+        return a.title.localeCompare(b.title);
+    }
+  });
 
   if (loading) {
     return (
@@ -102,7 +80,6 @@ const ProductListing = () => {
     <div className="min-h-screen gradient-bg">
       <Header />
       <main className="pt-20 max-w-7xl mx-auto px-4 py-8">
-        {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-4">
             {category ? `${category.replace('-', ' ')} Collection` : 'All Products'}
@@ -112,7 +89,6 @@ const ProductListing = () => {
           </p>
         </div>
 
-        {/* Filters and View Controls */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 bg-white rounded-lg p-4 shadow-sm">
           <div className="flex items-center space-x-4 mb-4 md:mb-0">
             <button className="flex items-center space-x-2 px-4 py-2 border border-pink-200 rounded-lg hover:bg-pink-50 transition-colors">
@@ -124,10 +100,9 @@ const ProductListing = () => {
               onChange={(e) => setSortBy(e.target.value)}
               className="px-4 py-2 border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
             >
-              <option value="name">Sort by Name</option>
+              <option value="title">Sort by Name</option>
               <option value="price-low">Price: Low to High</option>
               <option value="price-high">Price: High to Low</option>
-              <option value="rating">Highest Rated</option>
             </select>
           </div>
           
@@ -155,13 +130,12 @@ const ProductListing = () => {
           </div>
         </div>
 
-        {/* Products Grid */}
         <div className={`grid gap-6 ${
           viewMode === 'grid' 
             ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
             : 'grid-cols-1'
         }`}>
-          {products.map((product, index) => (
+          {sortedProducts.map((product, index) => (
             <div key={product.id} className="animate-fadeIn" style={{animationDelay: `${index * 0.1}s`}}>
               <ProductCard product={product} />
             </div>

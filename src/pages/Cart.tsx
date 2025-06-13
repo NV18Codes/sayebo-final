@@ -1,52 +1,40 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { useCart } from '../hooks/useCart';
+import { useAuth } from '../contexts/AuthContext';
 
 const Cart = () => {
-  // Mock cart items - will be replaced with Supabase data
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'African Print Dress',
-      price: 899,
-      image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=300&fit=crop',
-      quantity: 2,
-      size: 'M',
-      color: 'Pink'
-    },
-    {
-      id: 2,
-      name: 'Boho Chic Blouse',
-      price: 549,
-      image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=300&h=300&fit=crop',
-      quantity: 1,
-      size: 'L',
-      color: 'White'
+  const { cartItems, loading, updateQuantity, removeFromCart, getCartTotal } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
     }
-  ]);
+  }, [user, navigate]);
 
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity === 0) {
-      removeItem(id);
-      return;
-    }
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-
-  const removeItem = (id: number) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = getCartTotal();
   const shipping = subtotal > 500 ? 0 : 99;
-  const tax = subtotal * 0.15; // 15% VAT for South Africa
+  const tax = subtotal * 0.15;
   const total = subtotal + shipping + tax;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen gradient-bg">
+        <Header />
+        <div className="pt-24 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-pink-300 border-t-transparent"></div>
+            <p className="mt-4 text-pink-400 font-medium">Loading cart...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (cartItems.length === 0) {
     return (
@@ -76,24 +64,23 @@ const Cart = () => {
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Shopping Cart</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {cartItems.map((item) => (
               <div key={item.id} className="bg-white rounded-lg p-6 shadow-sm">
                 <div className="flex items-center space-x-4">
                   <img
-                    src={item.image}
-                    alt={item.name}
+                    src={item.product.image_url || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=300&fit=crop'}
+                    alt={item.product.title}
                     className="w-20 h-20 object-cover rounded-lg"
                   />
                   
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800">{item.name}</h3>
-                    <p className="text-sm text-gray-500">
-                      Size: {item.size} | Color: {item.color}
-                    </p>
+                    <h3 className="font-semibold text-gray-800">{item.product.title}</h3>
                     <p className="text-lg font-bold text-pink-400 mt-1">
-                      R{item.price.toLocaleString()}
+                      R{item.product.price.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      In stock: {item.product.stock}
                     </p>
                   </div>
 
@@ -107,15 +94,16 @@ const Cart = () => {
                       </button>
                       <span className="px-4 py-2 font-medium">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.id, Math.min(item.product.stock, item.quantity + 1))}
                         className="p-2 hover:bg-gray-50 transition-colors"
+                        disabled={item.quantity >= item.product.stock}
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                     </div>
                     
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeFromCart(item.id)}
                       className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                     >
                       <Trash2 className="w-5 h-5" />
@@ -126,7 +114,6 @@ const Cart = () => {
             ))}
           </div>
 
-          {/* Order Summary */}
           <div className="bg-white rounded-lg p-6 shadow-sm h-fit">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Order Summary</h2>
             

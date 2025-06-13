@@ -1,8 +1,9 @@
 
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +12,14 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { signIn, user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -23,12 +32,13 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate login process
-    setTimeout(() => {
-      console.log('Login attempt:', formData);
-      setLoading(false);
-      // In real app, this would authenticate with Supabase
-    }, 1000);
+    const { error } = await signIn(formData.email, formData.password);
+    
+    if (!error) {
+      navigate('/');
+    }
+    
+    setLoading(false);
   };
 
   return (
@@ -83,16 +93,6 @@ const Login = () => {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input type="checkbox" className="rounded border-gray-300 text-pink-400 focus:ring-pink-300" />
-                <span className="ml-2 text-sm text-gray-600">Remember me</span>
-              </label>
-              <Link to="/forgot-password" className="text-sm text-pink-400 hover:text-pink-500">
-                Forgot password?
-              </Link>
             </div>
 
             <button
