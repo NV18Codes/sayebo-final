@@ -23,13 +23,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log('Added to cart:', product.name);
-    // Add to cart logic here
+    // Add to cart logic here - will use Supabase when connected
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
     console.log('Added to wishlist:', product.name);
-    // Add to wishlist logic here
+    // Add to wishlist logic here - will use Supabase when connected
   };
 
   return (
@@ -95,14 +95,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-pink-400">
-              ₹{product.price.toLocaleString()}
+              R{product.price.toLocaleString()}
             </span>
             <span className="text-sm text-gray-400 line-through">
-              ₹{Math.round(product.price * 1.3).toLocaleString()}
+              R{Math.round(product.price * 1.4).toLocaleString()}
             </span>
           </div>
           <div className="text-sm text-green-600 font-medium">
-            23% OFF
+            30% OFF
           </div>
         </div>
       </div>
