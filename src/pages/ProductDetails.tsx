@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AmazonStyleHeader } from '../components/AmazonStyleHeader';
@@ -426,7 +425,11 @@ const ProductDetails = () => {
 
         {/* Recommendations */}
         <div className="mt-12">
-          <ProductRecommendations currentProductId={product.id} category={product.category} />
+          <ProductRecommendations 
+            title="Related Products"
+            currentProductId={product.id} 
+            category={product.category} 
+          />
         </div>
       </main>
     </div>
