@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -79,14 +78,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
               const currentPath = window.location.pathname;
               
-              // Only redirect if not already on the correct page
-              if (profile?.role === 'seller' && !currentPath.startsWith('/seller')) {
-                window.location.href = '/seller';
-              } else if (profile?.role === 'admin' && !currentPath.startsWith('/admin')) {
-                window.location.href = '/admin';
+              // Only redirect if not already on the correct page and not accessing seller dashboard
+              if (profile?.role === 'admin' && !currentPath.startsWith('/admin')) {
+                window.location.href = '/admin/dashboard';
               } else if (profile?.role === 'buyer' && currentPath === '/login') {
                 window.location.href = '/marketplace';
               }
+              // Remove seller auto-redirect to allow manual navigation to seller dashboard
             } catch (error) {
               console.error('Error fetching user profile:', error);
             }
