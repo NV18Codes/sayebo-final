@@ -46,9 +46,10 @@ const App = () => (
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/contact" element={<Contact />} />
             
-            {/* Seller Routes */}
+            {/* Seller Routes - Fixed routing */}
             <Route path="/seller-dashboard" element={<SellerDashboard />} />
             <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
+            <Route path="/seller" element={<SellerDashboard />} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />

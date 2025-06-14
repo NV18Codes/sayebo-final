@@ -17,7 +17,7 @@ export const AmazonStyleHeader = () => {
   return (
     <header className="bg-white text-gray-800 shadow-lg fixed top-0 w-full z-50 border-b border-pink-100">
       {/* Top bar */}
-      <div className="bg-gradient-to-r from-pink-50 to-orange-50 py-2 border-b border-pink-100">
+      <div className="bg-gradient-to-r from-pink-50 to-peach-50 py-2 border-b border-pink-100">
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center text-sm">
           <div className="hidden md:flex items-center space-x-4 text-gray-600">
             <span>🇿🇦 Deliver to South Africa</span>
@@ -104,7 +104,7 @@ export const AmazonStyleHeader = () => {
       </div>
 
       {/* Navigation categories */}
-      <nav className="bg-gradient-to-r from-pink-100 to-orange-100 py-3 border-t border-pink-200">
+      <nav className="bg-gradient-to-r from-pink-100 to-peach-100 py-3 border-t border-pink-200">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center space-x-8 overflow-x-auto">
             <Link to="/marketplace" className="whitespace-nowrap hover:text-pink-600 transition-colors flex items-center space-x-1 text-gray-700">
