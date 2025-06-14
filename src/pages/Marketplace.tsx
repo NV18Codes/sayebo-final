@@ -20,6 +20,9 @@ interface Product {
   description: string;
   stock: number;
   created_at: string;
+  discount_percentage?: number;
+  is_featured?: boolean;
+  brand?: string;
   profiles: {
     first_name: string;
     last_name: string;
@@ -57,6 +60,7 @@ const Marketplace = () => {
           *,
           profiles(first_name, last_name)
         `)
+        .eq('status', 'active')
         .gt('stock', 0)
         .order('created_at', { ascending: false });
 

@@ -2,6 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star, Heart, ShoppingCart, Truck } from 'lucide-react';
+import { useCart } from '../hooks/useCart';
+import { useToast } from '../hooks/use-toast';
 
 interface Product {
   id: string;
@@ -20,6 +22,9 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({ product }: ProductCardProps) => {
+  const { addToCart } = useCart();
+  const { toast } = useToast();
+
   const discountedPrice = product.discount_percentage 
     ? product.price * (1 - product.discount_percentage / 100)
     : product.price;
@@ -28,8 +33,36 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   const isLowStock = product.stock < 10;
   const isFeatured = product.is_featured;
 
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (product.stock === 0) {
+      toast({
+        title: "Out of Stock",
+        description: "This product is currently out of stock.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await addToCart(product.id, 1);
+      toast({
+        title: "Added to cart",
+        description: `${product.title} has been added to your cart.`
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
-    <div className="group relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+    <div className="group relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full flex flex-col">
       {/* Badges */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
         {isFeatured && (
@@ -42,7 +75,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             -{product.discount_percentage}%
           </span>
         )}
-        {isLowStock && (
+        {isLowStock && product.stock > 0 && (
           <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
             Low Stock
           </span>
@@ -69,8 +102,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         </div>
       </Link>
 
-      {/* Product Info */}
-      <div className="p-4">
+      {/* Product Info - Flex grow to fill space */}
+      <div className="p-4 flex flex-col flex-grow">
         {/* Brand */}
         {product.brand && (
           <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{product.brand}</p>
@@ -78,7 +111,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Title */}
         <Link to={`/product/${product.id}`}>
-          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-sayebo-pink-600 transition-colors">
+          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-sayebo-pink-600 transition-colors min-h-[3rem]">
             {product.title}
           </h3>
         </Link>
@@ -98,7 +131,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         </div>
 
         {/* Price */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold text-gray-900">
               R{discountedPrice.toLocaleString()}
@@ -122,14 +155,17 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           </span>
         </div>
 
-        {/* Add to Cart Button */}
-        <button
-          disabled={product.stock === 0}
-          className="w-full bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white py-3 px-4 rounded-xl font-semibold hover:from-sayebo-pink-600 hover:to-sayebo-orange-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
-        >
-          <ShoppingCart className="w-4 h-4" />
-          {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-        </button>
+        {/* Add to Cart Button - Push to bottom */}
+        <div className="mt-auto">
+          <button
+            onClick={handleAddToCart}
+            disabled={product.stock === 0}
+            className="w-full bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white py-3 px-4 rounded-xl font-semibold hover:from-sayebo-pink-600 hover:to-sayebo-orange-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+          </button>
+        </div>
       </div>
     </div>
   );

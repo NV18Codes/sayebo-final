@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AmazonStyleHeader } from '../components/AmazonStyleHeader';
+import { Header } from '../components/Header';
 import { ProductReviews } from '../components/ProductReviews';
 import { ProductRecommendations } from '../components/ProductRecommendations';
 import { ProductAttributes } from '../components/ProductAttributes';
@@ -19,7 +19,8 @@ import {
   Share2,
   Minus,
   Plus,
-  MapPin
+  MapPin,
+  ArrowLeft
 } from 'lucide-react';
 
 interface Product {
@@ -76,6 +77,11 @@ const ProductDetails = () => {
       setProduct(data);
     } catch (error) {
       console.error('Error fetching product:', error);
+      toast({
+        title: "Product not found",
+        description: "The product you're looking for doesn't exist.",
+        variant: "destructive"
+      });
       navigate('/marketplace');
     } finally {
       setLoading(false);
@@ -102,18 +108,15 @@ const ProductDetails = () => {
   const handleAddToCart = async () => {
     if (!product) return;
     
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
     try {
       await addToCart(product.id, quantity);
-      toast({
-        title: "Added to cart",
-        description: `${product.title} has been added to your cart.`
-      });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add item to cart. Please try again.",
-        variant: "destructive"
-      });
+      console.error('Error adding to cart:', error);
     }
   };
 
@@ -164,7 +167,7 @@ const ProductDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <AmazonStyleHeader />
+        <Header />
         <div className="pt-24 max-w-7xl mx-auto px-4 py-8">
           <div className="animate-pulse">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -185,7 +188,7 @@ const ProductDetails = () => {
   if (!product) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <AmazonStyleHeader />
+        <Header />
         <div className="pt-24 max-w-7xl mx-auto px-4 py-8 text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Product Not Found</h1>
           <p className="text-gray-600 mb-8">The product you're looking for doesn't exist.</p>
@@ -216,8 +219,8 @@ const ProductDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AmazonStyleHeader />
-      <main className="pt-4 max-w-7xl mx-auto px-4 py-8">
+      <Header />
+      <main className="pt-20 max-w-7xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
           <button onClick={() => navigate('/')} className="hover:text-sayebo-pink-600">Home</button>
@@ -230,6 +233,15 @@ const ProductDetails = () => {
           <span>/</span>
           <span className="text-gray-800">{product.title}</span>
         </nav>
+
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-600 hover:text-sayebo-pink-600 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Product Images */}
