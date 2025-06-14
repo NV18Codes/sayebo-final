@@ -136,6 +136,8 @@ const AdminDashboard = () => {
   };
 
   const suspendUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to suspend this user?')) return;
+
     try {
       const { error } = await supabase.rpc('suspend_user', {
         target_user_id: userId

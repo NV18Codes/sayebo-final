@@ -19,7 +19,6 @@ export const Header = () => {
   const handleSignOut = async () => {
     await signOut();
     setIsProfileOpen(false);
-    navigate('/');
   };
 
   // Close mobile menu when clicking outside
@@ -44,7 +43,7 @@ export const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-peach-300 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-[#FFDAB9] rounded-full flex items-center justify-center">
               <Heart className="w-5 h-5 text-white fill-white" />
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">
@@ -58,7 +57,7 @@ export const Header = () => {
               Home
             </Link>
             <Link to="/products" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
-              Products
+              Marketplace
             </Link>
             <Link to="/category/clothing-accessories" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
               Fashion
@@ -222,7 +221,7 @@ export const Header = () => {
                 className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Products
+                Marketplace
               </Link>
               <Link
                 to="/category/clothing-accessories"

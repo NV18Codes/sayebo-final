@@ -38,6 +38,11 @@ export const CategorySelector = ({ value, onChange, className = '' }: CategorySe
       setCategories(data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load categories",
+        variant: "destructive"
+      });
     }
   };
 

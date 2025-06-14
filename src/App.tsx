@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import ProductListing from "./pages/ProductListing";
+import Marketplace from "./pages/Marketplace";
 import ProductDetails from "./pages/ProductDetails";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
@@ -30,6 +31,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/products" element={<ProductListing />} />
+            <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
@@ -38,6 +40,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/orders" element={<Profile />} />
             <Route path="/seller" element={<SellerDashboard />} />
+            <Route path="/seller/dashboard" element={<SellerDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/category/:category" element={<ProductListing />} />

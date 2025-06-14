@@ -32,10 +32,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Handle successful login with role-based redirect
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(async () => {
+            try {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+              if (profile?.role === 'seller') {
+                window.location.href = '/seller';
+              } else if (profile?.role === 'admin') {
+                window.location.href = '/admin';
+              } else {
+                window.location.href = '/';
+              }
+            } catch (error) {
+              console.error('Error fetching user profile:', error);
+              window.location.href = '/';
+            }
+          }, 100);
+        }
       }
     );
 
@@ -113,11 +138,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        toast({
+          title: "Error signing out",
+          description: error.message,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Clear local state
+      setUser(null);
+      setSession(null);
+      
       toast({
-        title: "Signed out",
-        description: "You have been successfully signed out."
+        title: "Signed out successfully",
+        description: "You have been logged out of your account."
       });
+
+      // Redirect to home page
+      window.location.href = '/';
     } catch (error: any) {
       toast({
         title: "Error signing out",
