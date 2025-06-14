@@ -9,7 +9,7 @@ import { supabase } from '../integrations/supabase/client';
 
 const Profile = () => {
   const { user } = useAuth();
-  const { profile, refetch } = useProfile();
+  const { profile, fetchProfile } = useProfile();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,7 +41,7 @@ const Profile = () => {
 
       if (error) throw error;
 
-      await refetch();
+      await fetchProfile();
       setIsEditing(false);
       toast({
         title: "Profile updated",

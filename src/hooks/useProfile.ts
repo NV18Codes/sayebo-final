@@ -10,6 +10,9 @@ interface Profile {
   first_name: string;
   last_name: string;
   phone: string;
+  address: string;
+  city: string;
+  postal_code: string;
   role: 'buyer' | 'seller' | 'admin';
   created_at: string;
 }
@@ -81,6 +84,7 @@ export const useProfile = () => {
     profile,
     loading,
     updateProfile,
-    fetchProfile
+    fetchProfile,
+    refetch: fetchProfile // Add refetch as an alias for fetchProfile
   };
 };
