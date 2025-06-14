@@ -1,11 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
-import { Heart, ShoppingCart, Star, Badge } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useCart } from '../hooks/useCart';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../integrations/supabase/client';
-import { useToast } from '../hooks/use-toast';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Star, Heart, ShoppingCart, Truck } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -14,253 +10,126 @@ interface Product {
   image_url: string;
   category: string;
   stock: number;
-  brand?: string;
-  condition?: string;
   discount_percentage?: number;
   is_featured?: boolean;
+  brand?: string;
 }
 
 interface ProductCardProps {
   product: Product;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const navigate = useNavigate();
-  const { addToCart } = useCart();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [isInWishlist, setIsInWishlist] = useState(false);
-  const [wishlistLoading, setWishlistLoading] = useState(false);
-  const [averageRating, setAverageRating] = useState(0);
-  const [reviewCount, setReviewCount] = useState(0);
-
-  useEffect(() => {
-    if (user) {
-      checkWishlistStatus();
-    }
-    fetchReviewStats();
-  }, [user, product.id]);
-
-  const checkWishlistStatus = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('wishlist')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('product_id', product.id)
-        .maybeSingle();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error checking wishlist:', error);
-        return;
-      }
-
-      setIsInWishlist(!!data);
-    } catch (error) {
-      console.error('Error checking wishlist:', error);
-      setIsInWishlist(false);
-    }
-  };
-
-  const fetchReviewStats = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('product_reviews')
-        .select('rating')
-        .eq('product_id', product.id);
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        const avg = data.reduce((sum, review) => sum + review.rating, 0) / data.length;
-        setAverageRating(avg);
-        setReviewCount(data.length);
-      }
-    } catch (error) {
-      console.error('Error fetching review stats:', error);
-    }
-  };
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    addToCart(product.id);
-  };
-
-  const handleWishlist = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (!user) {
-      toast({
-        title: "Login required",
-        description: "Please log in to add items to your wishlist",
-        variant: "destructive"
-      });
-      navigate('/login');
-      return;
-    }
-
-    setWishlistLoading(true);
-
-    try {
-      if (isInWishlist) {
-        // Remove from wishlist
-        const { error } = await supabase
-          .from('wishlist')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('product_id', product.id);
-
-        if (error) throw error;
-
-        setIsInWishlist(false);
-        toast({
-          title: "Removed from wishlist",
-          description: "Product removed from your wishlist"
-        });
-      } else {
-        // Add to wishlist
-        const { error } = await supabase
-          .from('wishlist')
-          .insert({
-            user_id: user.id,
-            product_id: product.id
-          });
-
-        if (error) throw error;
-
-        setIsInWishlist(true);
-        toast({
-          title: "Added to wishlist",
-          description: "Product added to your wishlist"
-        });
-      }
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update wishlist",
-        variant: "destructive"
-      });
-    } finally {
-      setWishlistLoading(false);
-    }
-  };
-
+export const ProductCard = ({ product }: ProductCardProps) => {
   const discountedPrice = product.discount_percentage 
     ? product.price * (1 - product.discount_percentage / 100)
     : product.price;
 
+  const isOnSale = product.discount_percentage && product.discount_percentage > 0;
+  const isLowStock = product.stock < 10;
+  const isFeatured = product.is_featured;
+
   return (
-    <div 
-      className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer card-hover relative"
-      onClick={() => navigate(`/product/${product.id}`)}
-    >
+    <div className="group relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
       {/* Badges */}
-      <div className="absolute top-3 left-3 z-10 flex flex-col space-y-2">
-        {product.is_featured && (
-          <span className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-3 py-1 rounded-full text-xs font-bold">
+      <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+        {isFeatured && (
+          <span className="bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
             Featured
           </span>
         )}
-        {product.discount_percentage && product.discount_percentage > 0 && (
-          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+        {isOnSale && (
+          <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
             -{product.discount_percentage}%
           </span>
         )}
-        {product.condition && product.condition !== 'new' && (
-          <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium capitalize">
-            {product.condition}
+        {isLowStock && (
+          <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+            Low Stock
           </span>
         )}
       </div>
 
-      <div className="relative overflow-hidden">
-        <img
-          src={product.image_url || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=500&h=600&fit=crop'}
-          alt={product.title}
-          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
-        />
-        
-        <button
-          onClick={handleWishlist}
-          disabled={wishlistLoading}
-          className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 group-hover:scale-110"
-        >
-          <Heart className={`w-5 h-5 transition-colors ${
-            isInWishlist 
-              ? 'text-sayebo-pink-500 fill-sayebo-pink-500' 
-              : 'text-gray-400 hover:text-sayebo-pink-400 hover:fill-sayebo-pink-400'
-          }`} />
-        </button>
+      {/* Wishlist Button */}
+      <button className="absolute top-3 right-3 z-10 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white">
+        <Heart className="w-4 h-4 text-gray-600 hover:text-sayebo-pink-500" />
+      </button>
 
-        <div className="absolute top-3 left-3 bg-sayebo-pink-400 text-white px-3 py-1 rounded-full text-sm font-medium">
-          {product.category}
+      {/* Product Image */}
+      <Link to={`/product/${product.id}`} className="block">
+        <div className="aspect-square bg-gray-50 overflow-hidden">
+          <img
+            src={product.image_url || '/placeholder.svg'}
+            alt={product.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder.svg';
+            }}
+          />
         </div>
+      </Link>
 
-        <div className="absolute bottom-3 left-3 right-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="w-full bg-sayebo-pink-400 text-white py-2 rounded-lg font-medium hover:bg-sayebo-pink-500 transition-colors flex items-center justify-center space-x-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
-            <ShoppingCart className="w-4 h-4" />
-            <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
-          </button>
-        </div>
-      </div>
-
+      {/* Product Info */}
       <div className="p-4">
+        {/* Brand */}
         {product.brand && (
-          <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{product.brand}</p>
-        )}
-        
-        <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-sayebo-pink-400 transition-colors line-clamp-2">
-          {product.title}
-        </h3>
-        
-        {reviewCount > 0 && (
-          <div className="flex items-center mb-2">
-            <div className="flex items-center space-x-1">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-4 h-4 ${
-                    i < Math.floor(averageRating)
-                      ? 'text-yellow-400 fill-yellow-400' 
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-sm text-gray-500 ml-2">
-              {averageRating.toFixed(1)} ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
-            </span>
-          </div>
+          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{product.brand}</p>
         )}
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {product.discount_percentage && product.discount_percentage > 0 ? (
-              <>
-                <span className="text-2xl font-bold text-sayebo-pink-400">
-                  R{discountedPrice.toLocaleString()}
-                </span>
-                <span className="text-sm text-gray-400 line-through">
-                  R{product.price.toLocaleString()}
-                </span>
-              </>
-            ) : (
-              <span className="text-2xl font-bold text-sayebo-pink-400">
+        {/* Title */}
+        <Link to={`/product/${product.id}`}>
+          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-sayebo-pink-600 transition-colors">
+            {product.title}
+          </h3>
+        </Link>
+
+        {/* Category */}
+        <p className="text-sm text-gray-500 mb-2">{product.category}</p>
+
+        {/* Rating (placeholder) */}
+        <div className="flex items-center gap-1 mb-3">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className="w-4 h-4 fill-yellow-400 text-yellow-400"
+            />
+          ))}
+          <span className="text-sm text-gray-500 ml-1">(4.5)</span>
+        </div>
+
+        {/* Price */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold text-gray-900">
+              R{discountedPrice.toLocaleString()}
+            </span>
+            {isOnSale && (
+              <span className="text-sm text-gray-500 line-through">
                 R{product.price.toLocaleString()}
               </span>
             )}
           </div>
-          <div className="text-sm text-gray-500">
-            Stock: {product.stock}
-          </div>
         </div>
+
+        {/* Stock Status */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-1">
+            <Truck className="w-4 h-4 text-green-500" />
+            <span className="text-sm text-green-600">Free delivery</span>
+          </div>
+          <span className={`text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-500'}`}>
+            {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+          </span>
+        </div>
+
+        {/* Add to Cart Button */}
+        <button
+          disabled={product.stock === 0}
+          className="w-full bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white py-3 px-4 rounded-xl font-semibold hover:from-sayebo-pink-600 hover:to-sayebo-orange-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+        >
+          <ShoppingCart className="w-4 h-4" />
+          {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+        </button>
       </div>
     </div>
   );

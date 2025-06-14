@@ -1,63 +1,69 @@
 
-import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, MapPin, Package, Heart, Bell } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+  Search, 
+  ShoppingCart, 
+  User, 
+  Heart, 
+  Menu, 
+  X,
+  MapPin,
+  Truck,
+  Phone
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useProfile } from '../hooks/useProfile';
 import { useCart } from '../hooks/useCart';
 
 export const AmazonStyleHeader = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const { user, signOut } = useAuth();
-  const { profile } = useProfile();
-  const { cartItems } = useCart();
+  const { items } = useCart();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const cartItemCount = cartItems?.reduce((total, item) => total + item.quantity, 0) || 0;
+  const categories = [
+    'Electronics', 'Fashion', 'Home & Garden', 'Sports', 
+    'Books', 'Beauty', 'Automotive', 'Groceries'
+  ];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/marketplace?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 
   const handleSignOut = async () => {
     await signOut();
-    setShowUserMenu(false);
+    navigate('/');
   };
 
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setShowUserMenu(false);
-      setShowMobileMenu(false);
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
-
   return (
-    <header className="bg-gradient-to-r from-pink-600 via-pink-500 to-orange-400 text-white shadow-lg">
+    <header className="bg-white shadow-md sticky top-0 z-50">
       {/* Top Bar */}
-      <div className="bg-gradient-to-r from-pink-700 to-orange-500 text-sm">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1">
-              <MapPin className="w-4 h-4" />
-              <span>🇿🇦 Free delivery across South Africa</span>
+      <div className="bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1">
+                <MapPin className="w-4 h-4" />
+                <span>Deliver to South Africa</span>
+              </div>
+              <div className="hidden sm:flex items-center space-x-1">
+                <Truck className="w-4 h-4" />
+                <span>Free delivery on orders over R500</span>
+              </div>
             </div>
-          </div>
-          <div className="hidden md:flex items-center space-x-4">
-            <Link to="/contact" className="hover:text-orange-200 transition-colors">Customer Care</Link>
-            <span>|</span>
-            <Link to="/register" className="hover:text-orange-200 transition-colors">Become a Seller</Link>
-            <span>|</span>
-            <span className="text-orange-200">💳 Secure ZAR payments</span>
+            <div className="flex items-center space-x-4">
+              <div className="hidden sm:flex items-center space-x-1">
+                <Phone className="w-4 h-4" />
+                <span>Support: 0800-SAYEBO</span>
+              </div>
+              <Link to="/admin/login" className="hover:text-gray-300 transition-colors">
+                Admin Portal
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -68,222 +74,200 @@ export const AmazonStyleHeader = () => {
           {/* Logo */}
           <div className="flex items-center space-x-4">
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowMobileMenu(!showMobileMenu);
-              }}
-              className="md:hidden p-2 hover:bg-pink-600 rounded"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
             >
-              <Menu className="w-6 h-6" />
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
             
             <Link to="/" className="flex items-center space-x-2">
-              <div className="bg-white text-pink-500 font-bold text-xl px-3 py-1 rounded-lg shadow-md">
-                <Heart className="w-6 h-6 inline mr-1 fill-current" />
-                Sayebo
+              <div className="w-10 h-10 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">S</span>
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 bg-clip-text text-transparent">
+                  Sayebo
+                </h1>
+                <p className="text-xs text-gray-500">South Africa's Marketplace</p>
               </div>
             </Link>
           </div>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-3xl mx-4">
-            <form onSubmit={handleSearch} className="flex">
-              <select className="bg-gray-100 text-gray-900 px-3 py-2 rounded-l-lg border-r border-gray-300 focus:outline-none">
-                <option>All Categories</option>
-                <option>Fashion & Style</option>
-                <option>Electronics & Tech</option>
-                <option>Home & Garden</option>
-                <option>Beauty & Wellness</option>
-                <option>Sports & Outdoors</option>
-                <option>Books & Education</option>
-                <option>Automotive</option>
-                <option>Baby & Kids</option>
-              </select>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products across South Africa..."
-                className="flex-1 px-4 py-2 text-gray-900 focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-orange-400 hover:bg-orange-500 px-4 py-2 rounded-r-lg transition-colors"
-              >
-                <Search className="w-5 h-5" />
-              </button>
+          <div className="flex-1 max-w-2xl mx-4">
+            <form onSubmit={handleSearch} className="relative">
+              <div className="flex rounded-lg overflow-hidden border-2 border-sayebo-pink-200 focus-within:border-sayebo-pink-400">
+                <select className="px-3 py-2 bg-gray-50 border-r text-sm focus:outline-none">
+                  <option>All</option>
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for products, brands and more..."
+                  className="flex-1 px-4 py-2 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white hover:from-sayebo-pink-600 hover:to-sayebo-orange-600 transition-colors"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
             </form>
           </div>
 
-          {/* Right Actions */}
+          {/* Action Buttons */}
           <div className="flex items-center space-x-4">
-            {/* Language/Country */}
-            <div className="hidden md:flex items-center space-x-1 hover:bg-pink-600 px-2 py-1 rounded cursor-pointer">
-              <span className="text-sm">🇿🇦</span>
-              <span className="text-sm">ZAR</span>
-            </div>
-
-            {/* User Account */}
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowUserMenu(!showUserMenu);
-                }}
-                className="flex flex-col items-start hover:bg-pink-600 px-2 py-1 rounded transition-colors"
-              >
-                <span className="text-xs">Hello, {user ? profile?.first_name || 'User' : 'Sign in'}</span>
-                <span className="text-sm font-medium">My Account</span>
-              </button>
-
-              {/* User Dropdown */}
-              {showUserMenu && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white text-gray-900 rounded-lg shadow-xl border z-50">
-                  {!user ? (
-                    <div className="p-4">
-                      <div className="flex space-x-2 mb-4">
-                        <Link
-                          to="/login"
-                          className="flex-1 bg-gradient-to-r from-pink-400 to-orange-400 hover:from-pink-500 hover:to-orange-500 text-white px-4 py-2 rounded-lg text-center font-medium transition-colors"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Sign In
-                        </Link>
-                        <Link
-                          to="/register"
-                          className="flex-1 border border-pink-300 hover:bg-pink-50 px-4 py-2 rounded-lg text-center transition-colors"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Register
-                        </Link>
-                      </div>
-                      <div className="text-sm text-gray-600 text-center">
-                        New to Sayebo? <Link to="/register" className="text-pink-600 hover:underline">Join us today!</Link>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="py-2">
-                      <div className="px-4 py-2 border-b bg-gradient-to-r from-pink-50 to-orange-50">
-                        <div className="font-medium">{profile?.first_name} {profile?.last_name}</div>
-                        <div className="text-sm text-gray-600">{user.email}</div>
-                      </div>
-                      
-                      <div className="py-2">
-                        <Link
-                          to="/profile"
-                          className="block px-4 py-2 hover:bg-pink-50 transition-colors"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Your Profile
-                        </Link>
-                        <Link
-                          to="/orders"
-                          className="block px-4 py-2 hover:bg-pink-50 transition-colors"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Your Orders
-                        </Link>
-                        {profile?.role === 'seller' && (
-                          <Link
-                            to="/seller"
-                            className="block px-4 py-2 hover:bg-pink-50 transition-colors text-orange-600 font-medium"
-                            onClick={() => setShowUserMenu(false)}
-                          >
-                            Seller Dashboard
-                          </Link>
-                        )}
-                        {profile?.role === 'admin' && (
-                          <Link
-                            to="/admin"
-                            className="block px-4 py-2 hover:bg-pink-50 transition-colors text-pink-600 font-medium"
-                            onClick={() => setShowUserMenu(false)}
-                          >
-                            Admin Dashboard
-                          </Link>
-                        )}
-                        <div className="border-t mt-2 pt-2">
-                          <button
-                            onClick={handleSignOut}
-                            className="block w-full text-left px-4 py-2 hover:bg-pink-50 transition-colors text-red-600"
-                          >
-                            Sign Out
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+            {user ? (
+              <div className="hidden sm:flex items-center space-x-4">
+                <Link
+                  to="/wishlist"
+                  className="flex items-center space-x-1 text-gray-700 hover:text-sayebo-pink-500 transition-colors"
+                >
+                  <Heart className="w-6 h-6" />
+                  <span className="hidden lg:block">Wishlist</span>
+                </Link>
+                
+                <Link
+                  to="/cart"
+                  className="flex items-center space-x-1 text-gray-700 hover:text-sayebo-pink-500 transition-colors relative"
+                >
+                  <ShoppingCart className="w-6 h-6" />
+                  <span className="hidden lg:block">Cart</span>
+                  {items.length > 0 && (
+                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-sayebo-orange-500 text-white text-xs rounded-full flex items-center justify-center">
+                      {items.length}
+                    </span>
                   )}
+                </Link>
+                
+                <div className="relative group">
+                  <button className="flex items-center space-x-1 text-gray-700 hover:text-sayebo-pink-500 transition-colors">
+                    <User className="w-6 h-6" />
+                    <span className="hidden lg:block">Account</span>
+                  </button>
+                  
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div className="py-2">
+                      <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        My Profile
+                      </Link>
+                      <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        My Orders
+                      </Link>
+                      <Link to="/seller/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        Seller Dashboard
+                      </Link>
+                      <hr className="my-2" />
+                      <button
+                        onClick={handleSignOut}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Orders & Returns */}
-            <Link
-              to="/orders"
-              className="hidden md:flex flex-col items-start hover:bg-pink-600 px-2 py-1 rounded transition-colors"
-            >
-              <span className="text-xs">Returns</span>
-              <span className="text-sm font-medium">& Orders</span>
-            </Link>
-
-            {/* Wishlist */}
-            <Link
-              to="/wishlist"
-              className="hidden md:flex items-center hover:bg-pink-600 p-2 rounded transition-colors"
-            >
-              <Heart className="w-6 h-6" />
-            </Link>
-
-            {/* Cart */}
-            <Link
-              to="/cart"
-              className="flex items-center hover:bg-pink-600 p-2 rounded transition-colors relative"
-            >
-              <ShoppingCart className="w-6 h-6" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-orange-400 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                  {cartItemCount > 9 ? '9+' : cartItemCount}
-                </span>
-              )}
-              <span className="hidden md:block ml-1 text-sm">Cart</span>
-            </Link>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-sayebo-pink-600 border border-sayebo-pink-300 rounded-lg hover:bg-sayebo-pink-50 transition-colors"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-4 py-2 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white rounded-lg hover:from-sayebo-pink-600 hover:to-sayebo-orange-600 transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Navigation Bar */}
-      <div className="bg-gradient-to-r from-pink-600 to-orange-400">
-        <div className="max-w-7xl mx-auto px-4">
-          <nav className="flex items-center space-x-6 py-2 text-sm overflow-x-auto">
-            <Link to="/products" className="whitespace-nowrap hover:text-orange-200 transition-colors flex items-center space-x-1">
-              <Menu className="w-4 h-4" />
-              <span>All Products</span>
-            </Link>
-            <Link to="/category/fashion-style" className="whitespace-nowrap hover:text-orange-200 transition-colors">Fashion & Style</Link>
-            <Link to="/category/electronics-tech" className="whitespace-nowrap hover:text-orange-200 transition-colors">Electronics & Tech</Link>
-            <Link to="/category/home-garden" className="whitespace-nowrap hover:text-orange-200 transition-colors">Home & Garden</Link>
-            <Link to="/category/beauty-wellness" className="whitespace-nowrap hover:text-orange-200 transition-colors">Beauty & Wellness</Link>
-            <Link to="/category/sports-outdoors" className="whitespace-nowrap hover:text-orange-200 transition-colors">Sports & Outdoors</Link>
-            <Link to="/offers" className="whitespace-nowrap hover:text-orange-200 transition-colors text-orange-200 font-medium">🔥 Today's Deals</Link>
-            <Link to="/category/automotive" className="whitespace-nowrap hover:text-orange-200 transition-colors">Automotive</Link>
-          </nav>
+      {/* Categories Bar */}
+      <div className="bg-gray-50 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <div className="hidden lg:flex items-center space-x-8 text-sm">
+            {categories.map(category => (
+              <Link
+                key={category}
+                to={`/category/${encodeURIComponent(category.toLowerCase())}`}
+                className="text-gray-700 hover:text-sayebo-pink-600 transition-colors whitespace-nowrap"
+              >
+                {category}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      {showMobileMenu && (
-        <div className="md:hidden bg-pink-600 border-t border-pink-500">
-          <nav className="px-4 py-4 space-y-3">
-            <Link to="/products" className="block py-2 hover:text-orange-200 transition-colors">All Products</Link>
-            <Link to="/category/fashion-style" className="block py-2 hover:text-orange-200 transition-colors">Fashion & Style</Link>
-            <Link to="/category/electronics-tech" className="block py-2 hover:text-orange-200 transition-colors">Electronics & Tech</Link>
-            <Link to="/category/home-garden" className="block py-2 hover:text-orange-200 transition-colors">Home & Garden</Link>
-            <Link to="/category/beauty-wellness" className="block py-2 hover:text-orange-200 transition-colors">Beauty & Wellness</Link>
-            <Link to="/offers" className="block py-2 hover:text-orange-200 transition-colors">🔥 Today's Deals</Link>
-            {user && profile?.role === 'seller' && (
-              <Link to="/seller" className="block py-2 hover:text-orange-200 transition-colors">Seller Dashboard</Link>
+      {isMenuOpen && (
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+          <div className="p-4 space-y-4">
+            {categories.map(category => (
+              <Link
+                key={category}
+                to={`/category/${encodeURIComponent(category.toLowerCase())}`}
+                className="block text-gray-700 hover:text-sayebo-pink-600 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {category}
+              </Link>
+            ))}
+            
+            {user && (
+              <>
+                <hr className="my-4" />
+                <Link
+                  to="/wishlist"
+                  className="block text-gray-700 hover:text-sayebo-pink-600 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Wishlist
+                </Link>
+                <Link
+                  to="/cart"
+                  className="block text-gray-700 hover:text-sayebo-pink-600 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Cart ({items.length})
+                </Link>
+                <Link
+                  to="/profile"
+                  className="block text-gray-700 hover:text-sayebo-pink-600 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Profile
+                </Link>
+                <Link
+                  to="/orders"
+                  className="block text-gray-700 hover:text-sayebo-pink-600 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Orders
+                </Link>
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                  className="block w-full text-left text-red-600 hover:text-red-700 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </>
             )}
-            <Link to="/contact" className="block py-2 hover:text-orange-200 transition-colors">Customer Care</Link>
-          </nav>
+          </div>
         </div>
       )}
     </header>
