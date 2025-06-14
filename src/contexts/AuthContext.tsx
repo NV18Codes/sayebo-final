@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,30 +66,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Handle role-based redirects only on sign in, not on initial session or token refresh
+        // Only redirect on actual sign in from login page, not on session refresh or manual navigation
         if (event === 'SIGNED_IN' && session?.user) {
-          // Use setTimeout to avoid blocking the auth state change
-          setTimeout(async () => {
-            try {
-              const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', session.user.id)
-                .single();
+          const currentPath = window.location.pathname;
+          
+          // Only redirect if currently on login page - don't interfere with manual navigation
+          if (currentPath === '/login') {
+            setTimeout(async () => {
+              try {
+                const { data: profile } = await supabase
+                  .from('profiles')
+                  .select('role')
+                  .eq('id', session.user.id)
+                  .single();
 
-              const currentPath = window.location.pathname;
-              
-              // Only redirect if not already on the correct page and not accessing seller dashboard
-              if (profile?.role === 'admin' && !currentPath.startsWith('/admin')) {
-                window.location.href = '/admin/dashboard';
-              } else if (profile?.role === 'buyer' && currentPath === '/login') {
+                // Only redirect from login page based on role
+                if (profile?.role === 'admin') {
+                  window.location.href = '/admin/dashboard';
+                } else {
+                  window.location.href = '/marketplace';
+                }
+              } catch (error) {
+                console.error('Error fetching user profile:', error);
+                // Fallback redirect to marketplace
                 window.location.href = '/marketplace';
               }
-              // Remove seller auto-redirect to allow manual navigation to seller dashboard
-            } catch (error) {
-              console.error('Error fetching user profile:', error);
-            }
-          }, 100);
+            }, 100);
+          }
         }
       }
     );
