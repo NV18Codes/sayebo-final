@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../hooks/useProfile';
-import { AmazonStyleHeader } from '../components/AmazonStyleHeader';
+import { SellerHeader } from '../components/SellerHeader';
 import { SellerSidebar } from '../components/SellerSidebar';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Menu } from 'lucide-react';
@@ -36,9 +36,9 @@ export const SellerLayout: React.FC<SellerLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 to-sayebo-orange-50">
-      <AmazonStyleHeader />
+      <SellerHeader />
       
-      <div className="flex pt-4">
+      <div className="flex pt-16">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div 
@@ -49,7 +49,7 @@ export const SellerLayout: React.FC<SellerLayoutProps> = ({ children }) => {
         
         {/* Sidebar */}
         <div className={`
-          fixed lg:static inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:transform-none
+          fixed lg:static inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:transform-none pt-16
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
           <SellerSidebar onClose={() => setSidebarOpen(false)} />
@@ -58,7 +58,7 @@ export const SellerLayout: React.FC<SellerLayoutProps> = ({ children }) => {
         {/* Main content */}
         <main className="flex-1 lg:ml-0">
           {/* Mobile menu button */}
-          <div className="lg:hidden p-4 pt-6">
+          <div className="lg:hidden p-4">
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-2 rounded-lg bg-white shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors"

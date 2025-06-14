@@ -18,6 +18,10 @@ import OrderTracking from "./pages/OrderTracking";
 import Wishlist from "./pages/Wishlist";
 import Contact from "./pages/Contact";
 import SellerDashboard from "./pages/seller/SellerDashboard";
+import Products from "./pages/seller/Products";
+import Orders from "./pages/seller/Orders";
+import Analytics from "./pages/seller/Analytics";
+import Settings from "./pages/seller/Settings";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
@@ -46,9 +50,12 @@ const App = () => (
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/contact" element={<Contact />} />
             
-            {/* Seller Routes - Using the proper seller dashboard */}
+            {/* Seller Routes */}
             <Route path="/seller-dashboard" element={<SellerDashboard />} />
-            <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
+            <Route path="/seller-dashboard/products" element={<Products />} />
+            <Route path="/seller-dashboard/orders" element={<Orders />} />
+            <Route path="/seller-dashboard/analytics" element={<Analytics />} />
+            <Route path="/seller-dashboard/settings" element={<Settings />} />
             <Route path="/seller" element={<SellerDashboard />} />
             
             {/* Admin Routes */}

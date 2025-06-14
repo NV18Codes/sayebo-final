@@ -32,12 +32,12 @@ export const SellerSidebar: React.FC<SellerSidebarProps> = ({ onClose }) => {
   const location = useLocation();
 
   return (
-    <aside className="h-full w-64 bg-white shadow-lg border-r border-gray-200 pt-32 lg:pt-32">
+    <aside className="h-full w-64 bg-white shadow-lg border-r border-gray-200">
       <div className="flex flex-col h-full">
         {/* Mobile close button */}
         {onClose && (
           <div className="lg:hidden flex justify-between items-center px-6 py-4 border-b">
-            <h2 className="text-lg font-semibold gradient-text">Seller Dashboard</h2>
+            <h2 className="text-lg font-semibold gradient-text">Menu</h2>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -48,8 +48,8 @@ export const SellerSidebar: React.FC<SellerSidebarProps> = ({ onClose }) => {
         )}
         
         {/* Desktop header */}
-        <div className="hidden lg:block px-6 py-4">
-          <h2 className="text-lg font-semibold gradient-text">Seller Dashboard</h2>
+        <div className="hidden lg:block px-6 py-6">
+          <h2 className="text-lg font-semibold gradient-text">Seller Tools</h2>
         </div>
         
         <nav className="flex-1 px-4 space-y-1">
