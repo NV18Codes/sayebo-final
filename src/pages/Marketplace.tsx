@@ -1,10 +1,15 @@
 
 import { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
-import { ProductCard } from '../components/ProductCard';
+import { ProductGrid } from '../components/ProductGrid';
 import { CategoryFilter } from '../components/CategoryFilter';
-import { Search, Filter } from 'lucide-react';
+import { PriceFilter } from '../components/PriceFilter';
+import { MobileFilters } from '../components/MobileFilters';
+import { SearchBar } from '../components/SearchBar';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { Search, Filter, SlidersHorizontal } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
+import { useSearchParams } from 'react-router-dom';
 
 interface Product {
   id: string;
@@ -27,14 +32,21 @@ const Marketplace = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 });
+  const [sortBy, setSortBy] = useState('newest');
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    const searchQuery = searchParams.get('search');
+    if (searchQuery) {
+      setSearchTerm(searchQuery);
+    }
     fetchProducts();
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     filterProducts();
-  }, [products, selectedCategory, searchTerm]);
+  }, [products, selectedCategory, searchTerm, priceRange, sortBy]);
 
   const fetchProducts = async () => {
     try {
@@ -49,6 +61,14 @@ const Marketplace = () => {
 
       if (error) throw error;
       setProducts(data || []);
+      
+      // Set initial price range based on products
+      if (data && data.length > 0) {
+        const prices = data.map(p => p.price);
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        setPriceRange({ min: minPrice, max: maxPrice });
+      }
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
@@ -59,12 +79,14 @@ const Marketplace = () => {
   const filterProducts = () => {
     let filtered = products;
 
+    // Filter by category
     if (selectedCategory) {
       filtered = filtered.filter(product => 
         product.category.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
+    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(product =>
         product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -73,130 +95,150 @@ const Marketplace = () => {
       );
     }
 
+    // Filter by price range
+    filtered = filtered.filter(product =>
+      product.price >= priceRange.min && product.price <= priceRange.max
+    );
+
+    // Sort products
+    switch (sortBy) {
+      case 'price-low':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'name':
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      default: // newest
+        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+
     setFilteredProducts(filtered);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen gradient-bg">
-        <Header />
-        <div className="pt-24 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-pink-300 border-t-transparent"></div>
-            <p className="mt-4 text-pink-400 font-medium">Loading marketplace...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handlePriceChange = (min: number, max: number) => {
+    setPriceRange({ min, max });
+  };
 
   return (
-    <div className="min-h-screen gradient-bg">
+    <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 to-sayebo-orange-50">
       <Header />
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-pink-400 via-[#FFDAB9] to-pink-300 text-white py-16">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Discover Amazing Products
-            </h1>
-            <p className="text-xl mb-8 max-w-2xl mx-auto">
-              Shop from our curated collection of quality products from trusted sellers across South Africa
-            </p>
-            
-            {/* Search Bar */}
-            <div className="max-w-2xl mx-auto relative">
-              <input
-                type="text"
-                placeholder="Search for products, categories..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-full text-gray-800 focus:outline-none focus:ring-4 focus:ring-white/30 text-lg"
-              />
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
+        <section className="bg-gradient-to-r from-sayebo-pink-500 via-sayebo-orange-400 to-sayebo-pink-400 text-white py-8 sm:py-16">
+          <ResponsiveContainer>
+            <div className="text-center">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
+                Discover Amazing Products
+              </h1>
+              <p className="text-lg sm:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto">
+                Shop from our curated collection of quality products from trusted sellers across South Africa
+              </p>
+              
+              {/* Search Bar */}
+              <div className="max-w-2xl mx-auto">
+                <SearchBar
+                  onSearch={setSearchTerm}
+                  placeholder="Search for products, categories..."
+                  className="w-full"
+                />
+              </div>
             </div>
-          </div>
+          </ResponsiveContainer>
         </section>
 
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="flex flex-col lg:flex-row gap-8">
+        <ResponsiveContainer className="py-8 sm:py-12">
+          <div className="flex flex-col lg:flex-row gap-6 sm:gap-8">
             {/* Desktop Sidebar Filters */}
-            <aside className="hidden lg:block w-64 bg-white rounded-lg shadow-sm p-6 h-fit">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Categories</h3>
-              <CategoryFilter
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-              />
-            </aside>
-
-            {/* Mobile Filter Button */}
-            <div className="lg:hidden">
-              <button
-                onClick={() => setShowMobileFilters(!showMobileFilters)}
-                className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-pink-200"
-              >
-                <Filter className="w-4 h-4" />
-                <span>Filters</span>
-              </button>
-
-              {/* Mobile Filters */}
-              {showMobileFilters && (
-                <div className="mt-4 bg-white rounded-lg shadow-sm p-4">
+            <aside className="hidden lg:block w-64 bg-white rounded-lg shadow-sm p-6 h-fit sticky top-24">
+              <div className="space-y-6">
+                <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Categories</h3>
                   <CategoryFilter
                     selectedCategory={selectedCategory}
-                    onCategoryChange={(category) => {
-                      setSelectedCategory(category);
-                      setShowMobileFilters(false);
-                    }}
+                    onCategoryChange={setSelectedCategory}
                   />
                 </div>
-              )}
-            </div>
-
-            {/* Products Grid */}
-            <div className="flex-1">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {selectedCategory ? `${selectedCategory} Products` : 'All Products'}
-                </h2>
-                <p className="text-gray-600">
-                  {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
-                </p>
+                
+                <div>
+                  <PriceFilter
+                    minPrice={0}
+                    maxPrice={Math.max(...products.map(p => p.price), 10000)}
+                    onPriceChange={handlePriceChange}
+                  />
+                </div>
               </div>
+            </aside>
 
-              {filteredProducts.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="text-gray-400 mb-4">
-                    <Search className="w-16 h-16 mx-auto" />
+            {/* Main Content */}
+            <div className="flex-1">
+              {/* Mobile Controls */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div className="flex items-center gap-4">
+                  {/* Mobile Filter Button */}
+                  <button
+                    onClick={() => setShowMobileFilters(true)}
+                    className="lg:hidden flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-sayebo-pink-200 hover:bg-sayebo-pink-50 transition-colors"
+                  >
+                    <SlidersHorizontal className="w-4 h-4" />
+                    <span>Filters</span>
+                  </button>
+
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+                    {selectedCategory ? `${selectedCategory} Products` : 'All Products'}
+                  </h2>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center space-x-2">
+                    <label className="text-sm font-medium text-gray-600">Sort by:</label>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="bg-white border border-sayebo-pink-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300"
+                    >
+                      <option value="newest">Newest</option>
+                      <option value="price-low">Price: Low to High</option>
+                      <option value="price-high">Price: High to Low</option>
+                      <option value="name">Name: A to Z</option>
+                    </select>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">No products found</h3>
-                  <p className="text-gray-500">
-                    {searchTerm || selectedCategory
-                      ? 'Try adjusting your search or filters'
-                      : 'No products are currently available'}
+                  
+                  <p className="text-sm text-gray-600">
+                    {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
                   </p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredProducts.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={{
-                        id: product.id,
-                        title: product.title,
-                        price: product.price,
-                        image_url: product.image_url,
-                        category: product.category,
-                        stock: product.stock
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
+              </div>
+
+              {/* Products Grid */}
+              <ProductGrid
+                products={filteredProducts}
+                loading={loading}
+                emptyMessage={
+                  searchTerm || selectedCategory
+                    ? 'No products match your search criteria'
+                    : 'No products available'
+                }
+              />
             </div>
           </div>
-        </div>
+        </ResponsiveContainer>
+
+        {/* Mobile Filters Modal */}
+        <MobileFilters
+          isOpen={showMobileFilters}
+          onClose={() => setShowMobileFilters(false)}
+          selectedCategory={selectedCategory}
+          onCategoryChange={(category) => {
+            setSelectedCategory(category);
+            setShowMobileFilters(false);
+          }}
+          minPrice={0}
+          maxPrice={Math.max(...products.map(p => p.price), 10000)}
+          onPriceChange={handlePriceChange}
+        />
       </main>
     </div>
   );

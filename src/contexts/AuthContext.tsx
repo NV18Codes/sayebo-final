@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -104,7 +105,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string, role: 'buyer' | 'seller' = 'buyer') => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -126,7 +127,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error };
       }
 
-      // After successful signup, update the profile with the role
+      // After successful signup, explicitly create/update the profile with the correct role
+      if (data.user && !error) {
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+              id: data.user.id,
+              email: email,
+              first_name: firstName,
+              last_name: lastName,
+              role: role
+            });
+
+          if (profileError) {
+            console.error('Error creating profile:', profileError);
+          }
+        } catch (profileError) {
+          console.error('Error creating profile:', profileError);
+        }
+      }
+
       if (role === 'seller') {
         toast({
           title: "Seller account created!",

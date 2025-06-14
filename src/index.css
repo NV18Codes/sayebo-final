@@ -57,6 +57,11 @@
     @apply bg-background text-foreground;
     background: linear-gradient(135deg, #fff 0%, #ffcccb 50%, #ffb6c1 100%);
     min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 }
 
@@ -78,11 +83,23 @@
   }
   
   .btn-primary {
-    @apply bg-gradient-to-r from-sayebo-pink-400 to-sayebo-orange-300 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300;
+    @apply bg-gradient-to-r from-sayebo-pink-400 to-sayebo-orange-300 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:from-sayebo-pink-500 hover:to-sayebo-orange-400 active:scale-95;
   }
   
   .btn-secondary {
-    @apply bg-white text-sayebo-pink-400 border-2 border-sayebo-pink-300 font-semibold py-2 px-6 rounded-lg hover:bg-sayebo-pink-50 transition-all duration-300;
+    @apply bg-white text-sayebo-pink-400 border-2 border-sayebo-pink-300 font-semibold py-2 px-6 rounded-lg hover:bg-sayebo-pink-50 transition-all duration-300 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-sayebo-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-transparent transition-all duration-200;
+  }
+
+  .section-padding {
+    @apply py-12 sm:py-16 lg:py-20;
+  }
+
+  .container-responsive {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 }
 
@@ -97,10 +114,65 @@
   to { transform: translateX(0); }
 }
 
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.6s ease-out;
 }
 
 .animate-slideIn {
   animation: slideIn 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .mobile-hide {
+    display: none;
+  }
+}
+
+@media (min-width: 641px) {
+  .mobile-only {
+    display: none;
+  }
+}
+
+/* Loading states */
+.skeleton {
+  @apply bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-pulse;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #f472b6, #fb923c);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #ec4899, #f97316);
 }
