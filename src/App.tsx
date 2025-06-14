@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import SellerDashboard from "./pages/SellerDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/orders" element={<Profile />} />
             <Route path="/seller" element={<SellerDashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/category/:category" element={<ProductListing />} />
             <Route path="/offers" element={<ProductListing />} />

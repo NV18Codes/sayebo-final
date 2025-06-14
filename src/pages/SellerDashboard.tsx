@@ -7,6 +7,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../hooks/useProfile';
 import { supabase } from '../integrations/supabase/client';
 import { useToast } from '../hooks/use-toast';
+import { CategorySelector } from '../components/CategorySelector';
+import { ImageUpload } from '../components/ImageUpload';
 
 interface Product {
   id: string;
@@ -359,8 +361,8 @@ const SellerDashboard = () => {
 
             {/* Product Form Modal */}
             {showProductForm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
                   <h3 className="text-lg font-semibold mb-4">
                     {editingProduct ? 'Edit Product' : 'Add New Product'}
                   </h3>
@@ -370,14 +372,14 @@ const SellerDashboard = () => {
                       placeholder="Product title"
                       value={productForm.title}
                       onChange={(e) => setProductForm({...productForm, title: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
                       required
                     />
                     <textarea
                       placeholder="Product description"
                       value={productForm.description}
                       onChange={(e) => setProductForm({...productForm, description: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
                       rows={3}
                     />
                     <input
@@ -385,33 +387,38 @@ const SellerDashboard = () => {
                       placeholder="Price (ZAR)"
                       value={productForm.price}
                       onChange={(e) => setProductForm({...productForm, price: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
                       required
+                      step="0.01"
+                      min="0"
                     />
-                    <input
-                      type="text"
-                      placeholder="Category"
+                    
+                    <CategorySelector
                       value={productForm.category}
-                      onChange={(e) => setProductForm({...productForm, category: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-lg"
-                      required
+                      onChange={(category) => setProductForm({...productForm, category})}
                     />
+                    
                     <input
                       type="number"
                       placeholder="Stock quantity"
                       value={productForm.stock}
                       onChange={(e) => setProductForm({...productForm, stock: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
                       required
+                      min="0"
                     />
-                    <input
-                      type="url"
-                      placeholder="Image URL"
-                      value={productForm.image_url}
-                      onChange={(e) => setProductForm({...productForm, image_url: e.target.value})}
-                      className="w-full px-3 py-2 border rounded-lg"
-                    />
-                    <div className="flex space-x-3">
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Product Image
+                      </label>
+                      <ImageUpload
+                        value={productForm.image_url}
+                        onChange={(url) => setProductForm({...productForm, image_url: url})}
+                      />
+                    </div>
+                    
+                    <div className="flex space-x-3 pt-4">
                       <button type="submit" className="btn-primary flex-1">
                         {editingProduct ? 'Update' : 'Add'} Product
                       </button>

@@ -95,6 +95,46 @@ const Index = () => {
             </button>
           </div>
         </section>
+
+        {/* Why Choose Sayebo */}
+        <section className="bg-white py-16">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                Why Choose Sayebo?
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Experience the best online shopping designed for South African women
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🛍️</span>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Quality Products</h3>
+                <p className="text-gray-600">Carefully curated products from trusted sellers across South Africa</p>
+              </div>
+
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🚚</span>
+                </div>  
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Fast Delivery</h3>
+                <p className="text-gray-600">Quick and reliable delivery to your doorstep nationwide</p>
+              </div>
+
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">💝</span>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Women-Focused</h3>
+                <p className="text-gray-600">Designed specifically for South African women's needs and preferences</p>
+              </div>
+            </div>
+          </div>
+        </section>
         
         {/* Newsletter */}
         <section className="peach-gradient py-16">
