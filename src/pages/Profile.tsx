@@ -17,9 +17,6 @@ const Profile = () => {
     first_name: profile?.first_name || '',
     last_name: profile?.last_name || '',
     phone: profile?.phone || '',
-    address: profile?.address || '',
-    city: profile?.city || '',
-    postal_code: profile?.postal_code || '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -63,9 +60,6 @@ const Profile = () => {
       first_name: profile?.first_name || '',
       last_name: profile?.last_name || '',
       phone: profile?.phone || '',
-      address: profile?.address || '',
-      city: profile?.city || '',
-      postal_code: profile?.postal_code || '',
     });
     setIsEditing(false);
   };
@@ -231,65 +225,6 @@ const Profile = () => {
                     <div className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800 flex items-center">
                       <Phone className="w-4 h-4 mr-2 text-gray-400" />
                       {profile.phone || 'Not provided'}
-                    </div>
-                  )}
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Address
-                  </label>
-                  {isEditing ? (
-                    <textarea
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all resize-none"
-                      placeholder="Enter your full address"
-                    />
-                  ) : (
-                    <div className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800 flex items-start">
-                      <MapPin className="w-4 h-4 mr-2 mt-1 text-gray-400" />
-                      {profile.address || 'Not provided'}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    City
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all"
-                    />
-                  ) : (
-                    <div className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800">
-                      {profile.city || 'Not provided'}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Postal Code
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="postal_code"
-                      value={formData.postal_code}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all"
-                    />
-                  ) : (
-                    <div className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800">
-                      {profile.postal_code || 'Not provided'}
                     </div>
                   )}
                 </div>
