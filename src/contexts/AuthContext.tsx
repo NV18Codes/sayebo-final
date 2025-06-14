@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,15 +27,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
-  const [isFromLogin, setIsFromLogin] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     let mounted = true;
-    
-    // Check if we're coming from login page
-    setIsFromLogin(window.location.pathname === '/login');
     
     // Get initial session
     const getInitialSession = async () => {
@@ -48,57 +44,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setSession(session);
           setUser(session?.user ?? null);
           setLoading(false);
-          setInitialized(true);
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
         if (mounted) {
           setLoading(false);
-          setInitialized(true);
         }
       }
     };
 
-    // Set up auth state listener
+    // Set up auth state listener - simplified without redirects
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!mounted || !initialized) return;
+        if (!mounted) return;
         
         console.log('Auth state change:', event, session?.user?.id);
         
         setSession(session);
         setUser(session?.user ?? null);
-        
-        // Only redirect if this is a fresh sign in AND we came from login page
-        if (event === 'SIGNED_IN' && session?.user && isFromLogin) {
-          const currentPath = window.location.pathname;
-          
-          // Only redirect if still on login page
-          if (currentPath === '/login') {
-            setTimeout(async () => {
-              try {
-                const { data: profile } = await supabase
-                  .from('profiles')
-                  .select('role')
-                  .eq('id', session.user.id)
-                  .single();
-
-                // Redirect based on role
-                if (profile?.role === 'admin') {
-                  window.location.href = '/admin/dashboard';
-                } else {
-                  window.location.href = '/marketplace';
-                }
-              } catch (error) {
-                console.error('Error fetching user profile:', error);
-                // Fallback redirect to marketplace
-                window.location.href = '/marketplace';
-              }
-            }, 100);
-          }
-          // Reset the flag after handling
-          setIsFromLogin(false);
-        }
       }
     );
 
@@ -108,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [initialized, isFromLogin]);
+  }, []);
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string, role: 'buyer' | 'seller' = 'buyer') => {
     try {
@@ -175,16 +138,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Set flag that we're signing in from login page
-      setIsFromLogin(true);
-      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
-        setIsFromLogin(false); // Reset flag on error
         toast({
           title: "Sign in failed",
           description: error.message,
@@ -198,9 +157,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "You have successfully signed in."
       });
 
+      // Simple redirect after successful login - only from login page
+      if (window.location.pathname === '/login') {
+        setTimeout(async () => {
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', (await supabase.auth.getUser()).data.user?.id)
+              .single();
+
+            // Redirect based on role
+            if (profile?.role === 'admin') {
+              window.location.href = '/admin/dashboard';
+            } else if (profile?.role === 'seller') {
+              window.location.href = '/seller-dashboard';
+            } else {
+              window.location.href = '/marketplace';
+            }
+          } catch (error) {
+            console.error('Error fetching user profile:', error);
+            window.location.href = '/marketplace';
+          }
+        }, 100);
+      }
+
       return { error: null };
     } catch (error: any) {
-      setIsFromLogin(false); // Reset flag on error
       return { error };
     }
   };
@@ -221,7 +204,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Clear local state
       setUser(null);
       setSession(null);
-      setIsFromLogin(false);
       
       toast({
         title: "Signed out successfully",
