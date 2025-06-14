@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
@@ -80,10 +79,10 @@ const AdminDashboard = () => {
     
     setLoading(true);
     try {
-      // Fetch users
+      // Fetch users with is_suspended field
       const { data: usersData, error: usersError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, email, first_name, last_name, role, is_suspended, created_at')
         .order('created_at', { ascending: false });
 
       if (usersError) throw usersError;
