@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '../components/Header';
+import { AmazonStyleHeader } from '../components/AmazonStyleHeader';
 import { Package, TrendingUp, Users, DollarSign, Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../hooks/useProfile';
@@ -61,14 +60,16 @@ const SellerDashboard = () => {
     if (profile && profile.role !== 'seller') {
       toast({
         title: "Access denied",
-        description: "You need a seller account to access this page.",
+        description: "You need a seller account to access this page. Please register as a seller.",
         variant: "destructive"
       });
-      navigate('/');
+      navigate('/register');
       return;
     }
 
-    fetchSellerData();
+    if (profile?.role === 'seller') {
+      fetchSellerData();
+    }
   }, [user, profile, navigate]);
 
   const fetchSellerData = async () => {
@@ -220,12 +221,35 @@ const SellerDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen gradient-bg">
-        <Header />
+      <div className="min-h-screen bg-gray-100">
+        <AmazonStyleHeader />
         <div className="pt-24 flex items-center justify-center">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-pink-300 border-t-transparent"></div>
-            <p className="mt-4 text-pink-400 font-medium">Loading dashboard...</p>
+            <p className="mt-4 text-pink-400 font-medium">Loading seller dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile || profile.role !== 'seller') {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <AmazonStyleHeader />
+        <div className="pt-24 flex items-center justify-center">
+          <div className="text-center bg-white rounded-lg p-8 shadow-lg max-w-md">
+            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Become a Seller</h2>
+            <p className="text-gray-600 mb-6">
+              You need a seller account to access this dashboard. Start selling on Sayebo today!
+            </p>
+            <button
+              onClick={() => navigate('/register')}
+              className="bg-orange-400 hover:bg-orange-500 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              Register as Seller
+            </button>
           </div>
         </div>
       </div>
@@ -233,9 +257,9 @@ const SellerDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen gradient-bg">
-      <Header />
-      <main className="pt-20 max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-100">
+      <AmazonStyleHeader />
+      <main className="pt-4 max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Seller Dashboard</h1>
           <p className="text-gray-600">Manage your products and track your sales</p>

@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -127,10 +126,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { error };
       }
 
-      toast({
-        title: "Account created successfully!",
-        description: "Please check your email to verify your account."
-      });
+      // After successful signup, update the profile with the role
+      if (role === 'seller') {
+        toast({
+          title: "Seller account created!",
+          description: "Please check your email to verify your account. Once verified, you'll have access to the seller dashboard."
+        });
+      } else {
+        toast({
+          title: "Account created successfully!",
+          description: "Please check your email to verify your account."
+        });
+      }
 
       return { error: null };
     } catch (error: any) {
