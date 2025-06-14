@@ -12,7 +12,7 @@ import { useToast } from '../../hooks/use-toast';
 
 interface Product {
   id: string;
-  name: string;
+  title: string;
   price: number;
   stock: number;
   category: string;
@@ -37,7 +37,7 @@ const Products: React.FC = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('products')
-        .select('*')
+        .select('id, title, price, stock, category, status, created_at')
         .eq('seller_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -55,15 +55,20 @@ const Products: React.FC = () => {
     }
   };
 
+  const handleAddProduct = () => {
+    // TODO: Implement add product functionality
+    console.log('Add product clicked');
+  };
+
   const productColumns = [
     {
-      key: 'name',
+      key: 'title',
       header: 'Product Name',
       render: (product: Product) => (
         <div className="flex items-center space-x-3">
           <Package className="w-8 h-8 text-gray-400" />
           <div>
-            <div className="font-medium">{product.name}</div>
+            <div className="font-medium">{product.title}</div>
             <div className="text-sm text-gray-500">{product.category}</div>
           </div>
         </div>
@@ -118,12 +123,11 @@ const Products: React.FC = () => {
       <PageHeader 
         title="Products"
         description="Manage your product inventory"
-        action={
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Product
-          </Button>
-        }
+        action={{
+          label: "Add Product",
+          onClick: handleAddProduct,
+          icon: <Plus className="w-4 h-4 mr-2" />
+        }}
       />
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
