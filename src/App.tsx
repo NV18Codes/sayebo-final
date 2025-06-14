@@ -46,7 +46,7 @@ const App = () => (
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/contact" element={<Contact />} />
             
-            {/* Seller Routes */}
+            {/* Seller Routes - using the one in pages/seller/ */}
             <Route path="/seller-dashboard" element={<SellerDashboard />} />
             <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
             
