@@ -182,12 +182,14 @@ const Marketplace = () => {
                   {filteredProducts.map((product) => (
                     <ProductCard
                       key={product.id}
-                      id={product.id}
-                      title={product.title}
-                      price={product.price}
-                      image={product.image_url}
-                      category={product.category}
-                      seller={`${product.profiles?.first_name || ''} ${product.profiles?.last_name || ''}`.trim() || 'Unknown Seller'}
+                      product={{
+                        id: product.id,
+                        title: product.title,
+                        price: product.price,
+                        image_url: product.image_url,
+                        category: product.category,
+                        stock: product.stock
+                      }}
                     />
                   ))}
                 </div>
