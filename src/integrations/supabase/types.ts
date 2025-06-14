@@ -184,40 +184,188 @@ export type Database = {
           },
         ]
       }
+      product_attribute_values: {
+        Row: {
+          attribute_id: string
+          created_at: string
+          id: string
+          product_id: string
+          value: string
+        }
+        Insert: {
+          attribute_id: string
+          created_at?: string
+          id?: string
+          product_id: string
+          value: string
+        }
+        Update: {
+          attribute_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_attribute_values_attribute_id_fkey"
+            columns: ["attribute_id"]
+            isOneToOne: false
+            referencedRelation: "product_attributes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_attribute_values_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_attributes: {
+        Row: {
+          category_id: string
+          created_at: string
+          display_order: number | null
+          id: string
+          name: string
+          options: Json | null
+          required: boolean | null
+          type: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          name: string
+          options?: Json | null
+          required?: boolean | null
+          type: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          name?: string
+          options?: Json | null
+          required?: boolean | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_attributes_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          product_id: string
+          rating: number
+          title: string | null
+          updated_at: string
+          user_id: string
+          verified_purchase: boolean | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          product_id: string
+          rating: number
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          verified_purchase?: boolean | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          product_id?: string
+          rating?: number
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          verified_purchase?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
+          brand: string | null
           category: string
+          condition: string | null
           created_at: string | null
           description: string | null
+          discount_percentage: number | null
           id: string
           image_url: string | null
+          is_featured: boolean | null
           price: number
           seller_id: string | null
+          shipping_dimensions: string | null
+          shipping_weight: number | null
+          status: string | null
           stock: number | null
+          tags: string[] | null
           title: string
           updated_at: string | null
         }
         Insert: {
+          brand?: string | null
           category: string
+          condition?: string | null
           created_at?: string | null
           description?: string | null
+          discount_percentage?: number | null
           id?: string
           image_url?: string | null
+          is_featured?: boolean | null
           price: number
           seller_id?: string | null
+          shipping_dimensions?: string | null
+          shipping_weight?: number | null
+          status?: string | null
           stock?: number | null
+          tags?: string[] | null
           title: string
           updated_at?: string | null
         }
         Update: {
+          brand?: string | null
           category?: string
+          condition?: string | null
           created_at?: string | null
           description?: string | null
+          discount_percentage?: number | null
           id?: string
           image_url?: string | null
+          is_featured?: boolean | null
           price?: number
           seller_id?: string | null
+          shipping_dimensions?: string | null
+          shipping_weight?: number | null
+          status?: string | null
           stock?: number | null
+          tags?: string[] | null
           title?: string
           updated_at?: string | null
         }
