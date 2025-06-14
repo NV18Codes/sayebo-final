@@ -19,7 +19,7 @@
     --primary: 351 83% 82%; /* Light Pink */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 25 100% 94%; /* Peach */
+    --secondary: 25 100% 94%; /* Orange/Peach */
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 25 100% 96%;
@@ -65,7 +65,7 @@
     background: linear-gradient(135deg, #fff 0%, #ffcccb 30%, #ffb6c1 100%);
   }
   
-  .peach-gradient {
+  .orange-gradient {
     background: linear-gradient(135deg, #ffcccb 0%, #fff 100%);
   }
   
@@ -78,11 +78,11 @@
   }
   
   .btn-primary {
-    @apply bg-gradient-to-r from-pink-300 to-peach-200 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300;
+    @apply bg-gradient-to-r from-sayebo-pink-400 to-sayebo-orange-300 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300;
   }
   
   .btn-secondary {
-    @apply bg-white text-pink-400 border-2 border-pink-300 font-semibold py-2 px-6 rounded-lg hover:bg-pink-50 transition-all duration-300;
+    @apply bg-white text-sayebo-pink-400 border-2 border-sayebo-pink-300 font-semibold py-2 px-6 rounded-lg hover:bg-sayebo-pink-50 transition-all duration-300;
   }
 }
 
