@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 export const Hero = () => {
   return (
-    <div className="relative bg-gradient-to-br from-sayebo-pink-50 via-white to-sayebo-orange-50 overflow-hidden pt-32">
+    <div className="relative bg-gradient-to-br from-orange-50 via-white to-pink-50 overflow-hidden pt-32">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       
@@ -14,14 +14,14 @@ export const Hero = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="text-center lg:text-left">
-            <div className="inline-flex items-center px-4 py-2 bg-sayebo-pink-100 text-sayebo-pink-700 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center px-4 py-2 bg-pink-100 text-pink-700 rounded-full text-sm font-medium mb-6">
               <Star className="w-4 h-4 mr-2" />
               South Africa's #1 Online Marketplace
             </div>
             
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Shop Smart with{' '}
-              <span className="bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent">
                 Sayebo
               </span>
             </h1>
@@ -34,7 +34,7 @@ export const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link 
                 to="/marketplace"
-                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white font-semibold rounded-xl hover:from-sayebo-pink-600 hover:to-sayebo-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold rounded-xl hover:from-pink-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 shadow-lg"
               >
                 <ShoppingBag className="w-5 h-5 mr-2" />
                 Start Shopping
@@ -43,7 +43,7 @@ export const Hero = () => {
               
               <Link 
                 to="/seller-dashboard"
-                className="inline-flex items-center px-8 py-4 bg-white text-sayebo-orange-600 font-semibold rounded-xl border-2 border-sayebo-orange-200 hover:bg-sayebo-orange-50 transition-all duration-300"
+                className="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl border-2 border-orange-200 hover:bg-orange-50 transition-all duration-300"
               >
                 Become a Seller
               </Link>
@@ -55,16 +55,16 @@ export const Hero = () => {
             <div className="bg-white rounded-3xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500">
               <div className="grid grid-cols-2 gap-6">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-sayebo-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Truck className="w-8 h-8 text-sayebo-orange-600" />
+                  <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Truck className="w-8 h-8 text-orange-600" />
                   </div>
                   <h3 className="font-bold text-2xl text-gray-900">24h</h3>
                   <p className="text-gray-600">Fast Delivery</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-sayebo-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Shield className="w-8 h-8 text-sayebo-pink-600" />
+                  <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Shield className="w-8 h-8 text-pink-600" />
                   </div>
                   <h3 className="font-bold text-2xl text-gray-900">100%</h3>
                   <p className="text-gray-600">Secure Payment</p>
@@ -89,8 +89,8 @@ export const Hero = () => {
             </div>
             
             {/* Floating Elements */}
-            <div className="absolute -top-4 -right-4 w-20 h-20 bg-sayebo-orange-200 rounded-full opacity-60 animate-bounce"></div>
-            <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-sayebo-pink-200 rounded-full opacity-60 animate-pulse"></div>
+            <div className="absolute -top-4 -right-4 w-20 h-20 bg-orange-200 rounded-full opacity-60 animate-bounce"></div>
+            <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-pink-200 rounded-full opacity-60 animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -105,16 +105,16 @@ export const Hero = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-12 h-12 bg-sayebo-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Truck className="w-6 h-6 text-sayebo-orange-600" />
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Truck className="w-6 h-6 text-orange-600" />
               </div>
               <h3 className="font-semibold text-lg text-gray-900 mb-2">Free Delivery</h3>
               <p className="text-gray-600">Free delivery on orders over R500 across South Africa</p>
             </div>
             
             <div className="text-center">
-              <div className="w-12 h-12 bg-sayebo-pink-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-6 h-6 text-sayebo-pink-600" />
+              <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-6 h-6 text-pink-600" />
               </div>
               <h3 className="font-semibold text-lg text-gray-900 mb-2">Buyer Protection</h3>
               <p className="text-gray-600">Your purchases are protected with our money-back guarantee</p>
