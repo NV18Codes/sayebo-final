@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,10 +27,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
+  const [isFromLogin, setIsFromLogin] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     let mounted = true;
+    
+    // Check if we're coming from login page
+    setIsFromLogin(window.location.pathname === '/login');
     
     // Get initial session
     const getInitialSession = async () => {
@@ -66,11 +69,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Only redirect on actual sign in from login page, not on session refresh or manual navigation
-        if (event === 'SIGNED_IN' && session?.user) {
+        // Only redirect if this is a fresh sign in AND we came from login page
+        if (event === 'SIGNED_IN' && session?.user && isFromLogin) {
           const currentPath = window.location.pathname;
           
-          // Only redirect if currently on login page - don't interfere with manual navigation
+          // Only redirect if still on login page
           if (currentPath === '/login') {
             setTimeout(async () => {
               try {
@@ -80,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                   .eq('id', session.user.id)
                   .single();
 
-                // Only redirect from login page based on role
+                // Redirect based on role
                 if (profile?.role === 'admin') {
                   window.location.href = '/admin/dashboard';
                 } else {
@@ -93,6 +96,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               }
             }, 100);
           }
+          // Reset the flag after handling
+          setIsFromLogin(false);
         }
       }
     );
@@ -103,7 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [initialized]);
+  }, [initialized, isFromLogin]);
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string, role: 'buyer' | 'seller' = 'buyer') => {
     try {
@@ -170,12 +175,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // Set flag that we're signing in from login page
+      setIsFromLogin(true);
+      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        setIsFromLogin(false); // Reset flag on error
         toast({
           title: "Sign in failed",
           description: error.message,
@@ -191,6 +200,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       return { error: null };
     } catch (error: any) {
+      setIsFromLogin(false); // Reset flag on error
       return { error };
     }
   };
@@ -211,6 +221,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Clear local state
       setUser(null);
       setSession(null);
+      setIsFromLogin(false);
       
       toast({
         title: "Signed out successfully",
