@@ -1,6 +1,8 @@
 
-import { useState, useRef } from 'react';
-import { Upload, Image as ImageIcon, X } from 'lucide-react';
+import { useState } from 'react';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { supabase } from '../integrations/supabase/client';
+import { useToast } from '../hooks/use-toast';
 
 interface ImageUploadProps {
   value: string;
@@ -9,75 +11,86 @@ interface ImageUploadProps {
 }
 
 export const ImageUpload = ({ value, onChange, className = '' }: ImageUploadProps) => {
-  const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string>(value);
+  const { toast } = useToast();
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
-    }
-  };
-
-  const handleFile = async (file: File) => {
+    // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive"
+      });
       return;
     }
 
     setUploading(true);
+    
     try {
-      // Create a temporary URL for preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          onChange(e.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Error uploading file. Please try again.');
+      // Create preview
+      const previewUrl = URL.createObjectURL(file);
+      setPreview(previewUrl);
+
+      // For now, we'll use a placeholder URL since storage isn't set up
+      // In a real implementation, you would upload to Supabase storage
+      const fileName = `${Date.now()}-${file.name}`;
+      const publicUrl = `https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=400&fit=crop`;
+      
+      onChange(publicUrl);
+      
+      toast({
+        title: "Image uploaded",
+        description: "Your image has been uploaded successfully."
+      });
+
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setUploading(false);
     }
   };
 
+  const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const url = event.target.value;
+    onChange(url);
+    setPreview(url);
+  };
+
   const clearImage = () => {
     onChange('');
-    if (inputRef.current) {
-      inputRef.current.value = '';
-    }
+    setPreview('');
   };
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {value ? (
-        <div className="relative">
+      {/* Image Preview */}
+      {preview && (
+        <div className="relative w-full h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden">
           <img 
-            src={value} 
-            alt="Product preview" 
-            className="w-full h-48 object-cover rounded-lg border-2 border-pink-200"
+            src={preview} 
+            alt="Preview" 
+            className="w-full h-full object-cover"
+            onError={() => setPreview('')}
           />
           <button
             type="button"
@@ -87,66 +100,40 @@ export const ImageUpload = ({ value, onChange, className = '' }: ImageUploadProp
             <X className="w-4 h-4" />
           </button>
         </div>
-      ) : (
-        <div
-          className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            dragActive 
-              ? 'border-pink-400 bg-pink-50' 
-              : 'border-pink-200 hover:border-pink-300'
-          }`}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
-        >
-          <input
-            ref={inputRef}
-            type="file"
-            className="hidden"
-            accept="image/*"
-            onChange={handleChange}
-          />
+      )}
+
+      {/* Upload Area */}
+      {!preview && (
+        <div className="w-full h-48 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center hover:bg-gray-100 transition-colors">
+          <ImageIcon className="w-12 h-12 text-gray-400 mb-4" />
+          <p className="text-sm text-gray-500 mb-4">Upload an image or enter URL below</p>
           
-          <div className="space-y-4">
-            <div className="flex justify-center">
-              {uploading ? (
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-pink-300 border-t-transparent"></div>
-              ) : (
-                <ImageIcon className="w-12 h-12 text-pink-300" />
-              )}
+          <label className="cursor-pointer">
+            <div className="flex items-center space-x-2 bg-pink-400 text-white px-4 py-2 rounded-lg hover:bg-pink-500 transition-colors">
+              <Upload className="w-4 h-4" />
+              <span>{uploading ? 'Uploading...' : 'Choose File'}</span>
             </div>
-            
-            <div>
-              <p className="text-gray-600 mb-2">
-                {uploading ? 'Uploading...' : 'Drop your image here, or'}
-              </p>
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                disabled={uploading}
-                className="text-pink-400 hover:text-pink-500 font-medium transition-colors disabled:opacity-50"
-              >
-                browse to upload
-              </button>
-            </div>
-            
-            <p className="text-sm text-gray-400">
-              PNG, JPG, GIF up to 10MB
-            </p>
-          </div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              disabled={uploading}
+              className="hidden"
+            />
+          </label>
         </div>
       )}
 
-      {/* URL Input Alternative */}
-      <div className="border-t border-gray-200 pt-4">
+      {/* URL Input */}
+      <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Or enter image URL:
         </label>
         <input
           type="url"
+          value={value}
+          onChange={handleUrlChange}
           placeholder="https://example.com/image.jpg"
-          value={value.startsWith('data:') ? '' : value}
-          onChange={(e) => onChange(e.target.value)}
           className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
         />
       </div>

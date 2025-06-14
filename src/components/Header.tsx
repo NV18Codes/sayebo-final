@@ -56,7 +56,7 @@ export const Header = () => {
             <Link to="/" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
               Home
             </Link>
-            <Link to="/products" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
+            <Link to="/marketplace" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
               Marketplace
             </Link>
             <Link to="/category/clothing-accessories" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
@@ -217,7 +217,7 @@ export const Header = () => {
                 Home
               </Link>
               <Link
-                to="/products"
+                to="/marketplace"
                 className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >

@@ -27,19 +27,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+    
+    // Get initial session
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting session:', error);
+        }
+        
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+          setInitialized(true);
+        }
+      } catch (error) {
+        console.error('Error in getInitialSession:', error);
+        if (mounted) {
+          setLoading(false);
+          setInitialized(true);
+        }
+      }
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted || !initialized) return;
+        
         console.log('Auth state change:', event, session?.user?.id);
+        
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
-
-        // Handle successful login with role-based redirect
+        
+        // Handle role-based redirects only on sign in, not on initial session or token refresh
         if (event === 'SIGNED_IN' && session?.user) {
+          // Use setTimeout to avoid blocking the auth state change
           setTimeout(async () => {
             try {
               const { data: profile } = await supabase
@@ -48,31 +77,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 .eq('id', session.user.id)
                 .single();
 
-              if (profile?.role === 'seller') {
+              const currentPath = window.location.pathname;
+              
+              // Only redirect if not already on the correct page
+              if (profile?.role === 'seller' && !currentPath.startsWith('/seller')) {
                 window.location.href = '/seller';
-              } else if (profile?.role === 'admin') {
+              } else if (profile?.role === 'admin' && !currentPath.startsWith('/admin')) {
                 window.location.href = '/admin';
-              } else {
-                window.location.href = '/';
+              } else if (profile?.role === 'buyer' && currentPath === '/login') {
+                window.location.href = '/marketplace';
               }
             } catch (error) {
               console.error('Error fetching user profile:', error);
-              window.location.href = '/';
             }
           }, 100);
         }
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    getInitialSession();
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [initialized]);
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string, role: 'buyer' | 'seller' = 'buyer') => {
     try {

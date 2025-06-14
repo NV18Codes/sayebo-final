@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
-import { Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Register = () => {
@@ -10,10 +10,9 @@ const Register = () => {
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
-    accountType: 'buyer' as 'buyer' | 'seller'
+    role: 'buyer' as 'buyer' | 'seller'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,7 +40,7 @@ const Register = () => {
       alert('Passwords do not match');
       return;
     }
-
+    
     setLoading(true);
     
     const { error } = await signUp(
@@ -49,11 +48,11 @@ const Register = () => {
       formData.password, 
       formData.firstName, 
       formData.lastName,
-      formData.accountType
+      formData.role
     );
     
     if (!error) {
-      navigate('/');
+      navigate('/login');
     }
     
     setLoading(false);
@@ -66,7 +65,7 @@ const Register = () => {
         <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Join Sayebo</h1>
-            <p className="text-gray-600">Create your account to get started</p>
+            <p className="text-gray-600">Create your account to start shopping</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -88,19 +87,23 @@ const Register = () => {
                   />
                 </div>
               </div>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Last Name
                 </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
-                  placeholder="Last name"
-                  required
-                />
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    placeholder="Last name"
+                    required
+                  />
+                </div>
               </div>
             </div>
 
@@ -124,34 +127,16 @@ const Register = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
-                  placeholder="Phone number"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Account Type
               </label>
               <select
-                name="accountType"
-                value={formData.accountType}
+                name="role"
+                value={formData.role}
                 onChange={handleInputChange}
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
               >
-                <option value="buyer">Buyer</option>
-                <option value="seller">Seller</option>
+                <option value="buyer">Buyer - Shop products</option>
+                <option value="seller">Seller - Sell products</option>
               </select>
             </div>
 

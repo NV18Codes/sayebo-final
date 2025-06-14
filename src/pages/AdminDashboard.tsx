@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
-import { Users, Package, TrendingUp, Shield, Ban, CheckCircle, Trash2, AlertTriangle } from 'lucide-react';
+import { Users, Package, TrendingUp, Shield, UserX, UserCheck, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../hooks/useProfile';
 import { supabase } from '../integrations/supabase/client';
@@ -14,6 +14,7 @@ interface User {
   first_name: string;
   last_name: string;
   role: string;
+  is_suspended: boolean;
   created_at: string;
 }
 
@@ -47,7 +48,7 @@ const AdminDashboard = () => {
     totalUsers: 0,
     totalSellers: 0,
     totalProducts: 0,
-    totalOrders: 0
+    totalCategories: 0
   });
 
   const { user } = useAuth();
@@ -75,6 +76,8 @@ const AdminDashboard = () => {
   }, [user, profile, navigate]);
 
   const fetchAdminData = async () => {
+    if (!user) return;
+    
     setLoading(true);
     try {
       // Fetch users
@@ -86,7 +89,7 @@ const AdminDashboard = () => {
       if (usersError) throw usersError;
       setUsers(usersData || []);
 
-      // Fetch products with seller info
+      // Fetch products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
         .select(`
@@ -111,23 +114,20 @@ const AdminDashboard = () => {
       const totalUsers = usersData?.length || 0;
       const totalSellers = usersData?.filter(u => u.role === 'seller').length || 0;
       const totalProducts = productsData?.length || 0;
+      const totalCategories = categoriesData?.length || 0;
 
-      const { data: ordersData } = await supabase
-        .from('orders')
-        .select('id');
-      
       setStats({
         totalUsers,
         totalSellers,
         totalProducts,
-        totalOrders: ordersData?.length || 0
+        totalCategories
       });
 
     } catch (error) {
       console.error('Error fetching admin data:', error);
       toast({
         title: "Error",
-        description: "Failed to load admin data.",
+        description: "Failed to load admin data",
         variant: "destructive"
       });
     } finally {
@@ -135,32 +135,32 @@ const AdminDashboard = () => {
     }
   };
 
-  const suspendUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to suspend this user?')) return;
-
+  const handleSuspendUser = async (userId: string, suspend: boolean) => {
     try {
-      const { error } = await supabase.rpc('suspend_user', {
-        target_user_id: userId
-      });
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_suspended: suspend })
+        .eq('id', userId);
 
       if (error) throw error;
 
       toast({
-        title: "User suspended",
-        description: "User has been suspended successfully."
+        title: suspend ? "User suspended" : "User reactivated",
+        description: `User has been ${suspend ? 'suspended' : 'reactivated'} successfully.`
       });
 
       fetchAdminData();
     } catch (error: any) {
+      console.error('Error updating user status:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to suspend user.",
+        description: "Failed to update user status",
         variant: "destructive"
       });
     }
   };
 
-  const deleteProduct = async (productId: string) => {
+  const handleDeleteProduct = async (productId: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
@@ -173,20 +173,21 @@ const AdminDashboard = () => {
 
       toast({
         title: "Product deleted",
-        description: "Product has been removed successfully."
+        description: "Product has been deleted successfully."
       });
 
       fetchAdminData();
     } catch (error: any) {
+      console.error('Error deleting product:', error);
       toast({
         title: "Error",
-        description: "Failed to delete product.",
+        description: "Failed to delete product",
         variant: "destructive"
       });
     }
   };
 
-  const toggleCategory = async (categoryId: string, isActive: boolean) => {
+  const handleToggleCategory = async (categoryId: string, isActive: boolean) => {
     try {
       const { error } = await supabase
         .from('categories')
@@ -202,9 +203,10 @@ const AdminDashboard = () => {
 
       fetchAdminData();
     } catch (error: any) {
+      console.error('Error toggling category:', error);
       toast({
         title: "Error",
-        description: "Failed to update category status.",
+        description: "Failed to update category status",
         variant: "destructive"
       });
     }
@@ -229,10 +231,7 @@ const AdminDashboard = () => {
       <Header />
       <main className="pt-20 max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-            <Shield className="w-8 h-8 text-pink-400 mr-3" />
-            Admin Dashboard
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
           <p className="text-gray-600">Manage users, products, and platform settings</p>
         </div>
 
@@ -262,84 +261,44 @@ const AdminDashboard = () => {
 
         {/* Overview Tab */}
         {activeTab === 'overview' && (
-          <div className="space-y-8">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Total Users</p>
-                    <p className="text-2xl font-bold text-gray-800">{stats.totalUsers}</p>
-                  </div>
-                  <Users className="w-8 h-8 text-blue-500" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Total Users</p>
+                  <p className="text-2xl font-bold text-gray-800">{stats.totalUsers}</p>
                 </div>
-              </div>
-              
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Sellers</p>
-                    <p className="text-2xl font-bold text-gray-800">{stats.totalSellers}</p>
-                  </div>
-                  <Shield className="w-8 h-8 text-green-500" />
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Products</p>
-                    <p className="text-2xl font-bold text-gray-800">{stats.totalProducts}</p>
-                  </div>
-                  <Package className="w-8 h-8 text-purple-500" />
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Orders</p>
-                    <p className="text-2xl font-bold text-gray-800">{stats.totalOrders}</p>
-                  </div>
-                  <TrendingUp className="w-8 h-8 text-pink-500" />
-                </div>
+                <Users className="w-8 h-8 text-blue-500" />
               </div>
             </div>
-
-            {/* Recent Activity */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">Recent Users</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 text-sm font-medium text-gray-600">User</th>
-                      <th className="text-left py-3 text-sm font-medium text-gray-600">Role</th>
-                      <th className="text-left py-3 text-sm font-medium text-gray-600">Joined</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.slice(0, 5).map((user) => (
-                      <tr key={user.id} className="border-b border-gray-100">
-                        <td className="py-3 text-sm text-gray-600">
-                          {user.first_name} {user.last_name} ({user.email})
-                        </td>
-                        <td className="py-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            user.role === 'admin' ? 'bg-red-100 text-red-800' :
-                            user.role === 'seller' ? 'bg-blue-100 text-blue-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {user.role}
-                          </span>
-                        </td>
-                        <td className="py-3 text-sm text-gray-600">
-                          {new Date(user.created_at).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Sellers</p>
+                  <p className="text-2xl font-bold text-gray-800">{stats.totalSellers}</p>
+                </div>
+                <Shield className="w-8 h-8 text-green-500" />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Total Products</p>
+                  <p className="text-2xl font-bold text-gray-800">{stats.totalProducts}</p>
+                </div>
+                <Package className="w-8 h-8 text-purple-500" />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Categories</p>
+                  <p className="text-2xl font-bold text-gray-800">{stats.totalCategories}</p>
+                </div>
+                <TrendingUp className="w-8 h-8 text-pink-500" />
               </div>
             </div>
           </div>
@@ -348,15 +307,14 @@ const AdminDashboard = () => {
         {/* Users Tab */}
         {activeTab === 'users' && (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-800">User Management</h2>
-            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">User</th>
+                    <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Email</th>
                     <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Role</th>
+                    <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Status</th>
                     <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Joined</th>
                     <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Actions</th>
                   </tr>
@@ -364,19 +322,28 @@ const AdminDashboard = () => {
                 <tbody>
                   {users.map((user) => (
                     <tr key={user.id} className="border-b border-gray-100">
+                      <td className="py-4 px-6 text-sm font-medium text-gray-800">
+                        {user.first_name} {user.last_name}
+                      </td>
+                      <td className="py-4 px-6 text-sm text-gray-600">{user.email}</td>
                       <td className="py-4 px-6">
-                        <div>
-                          <p className="font-medium text-gray-800">{user.first_name} {user.last_name}</p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
-                        </div>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          user.role === 'admin' 
+                            ? 'bg-red-100 text-red-800'
+                            : user.role === 'seller'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {user.role}
+                        </span>
                       </td>
                       <td className="py-4 px-6">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          user.role === 'admin' ? 'bg-red-100 text-red-800' :
-                          user.role === 'seller' ? 'bg-blue-100 text-blue-800' :
-                          'bg-gray-100 text-gray-800'
+                          user.is_suspended 
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-green-100 text-green-800'
                         }`}>
-                          {user.role}
+                          {user.is_suspended ? 'Suspended' : 'Active'}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-sm text-gray-600">
@@ -385,11 +352,14 @@ const AdminDashboard = () => {
                       <td className="py-4 px-6">
                         {user.role !== 'admin' && (
                           <button
-                            onClick={() => suspendUser(user.id)}
-                            className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                            title="Suspend user"
+                            onClick={() => handleSuspendUser(user.id, !user.is_suspended)}
+                            className={`p-1 rounded ${
+                              user.is_suspended 
+                                ? 'text-green-500 hover:bg-green-50'
+                                : 'text-red-500 hover:bg-red-50'
+                            }`}
                           >
-                            <Ban className="w-4 h-4" />
+                            {user.is_suspended ? <UserCheck className="w-4 h-4" /> : <UserX className="w-4 h-4" />}
                           </button>
                         )}
                       </td>
@@ -404,40 +374,30 @@ const AdminDashboard = () => {
         {/* Products Tab */}
         {activeTab === 'products' && (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-800">Product Management</h2>
-            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Product</th>
-                    <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Seller</th>
                     <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Price</th>
                     <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Category</th>
+                    <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Seller</th>
                     <th className="text-left py-3 px-6 text-sm font-medium text-gray-600">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {products.map((product) => (
                     <tr key={product.id} className="border-b border-gray-100">
-                      <td className="py-4 px-6">
-                        <p className="font-medium text-gray-800">{product.title}</p>
-                      </td>
+                      <td className="py-4 px-6 text-sm font-medium text-gray-800">{product.title}</td>
+                      <td className="py-4 px-6 text-sm text-gray-600">R{product.price.toLocaleString()}</td>
+                      <td className="py-4 px-6 text-sm text-gray-600">{product.category}</td>
                       <td className="py-4 px-6 text-sm text-gray-600">
                         {product.profiles?.first_name} {product.profiles?.last_name}
                       </td>
-                      <td className="py-4 px-6 text-sm font-medium text-gray-800">
-                        R{product.price.toLocaleString()}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
-                        {product.category}
-                      </td>
                       <td className="py-4 px-6">
                         <button
-                          onClick={() => deleteProduct(product.id)}
-                          className="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                          title="Delete product"
+                          onClick={() => handleDeleteProduct(product.id)}
+                          className="p-1 text-red-500 hover:bg-red-50 rounded"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -453,9 +413,6 @@ const AdminDashboard = () => {
         {/* Categories Tab */}
         {activeTab === 'categories' && (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-800">Category Management</h2>
-            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
@@ -470,17 +427,13 @@ const AdminDashboard = () => {
                 <tbody>
                   {categories.map((category) => (
                     <tr key={category.id} className="border-b border-gray-100">
-                      <td className="py-4 px-6 font-medium text-gray-800">
-                        {category.name}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-gray-600">
-                        {category.description}
-                      </td>
+                      <td className="py-4 px-6 text-sm font-medium text-gray-800">{category.name}</td>
+                      <td className="py-4 px-6 text-sm text-gray-600">{category.description}</td>
                       <td className="py-4 px-6">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           category.is_active 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
                         }`}>
                           {category.is_active ? 'Active' : 'Inactive'}
                         </span>
@@ -490,11 +443,14 @@ const AdminDashboard = () => {
                       </td>
                       <td className="py-4 px-6">
                         <button
-                          onClick={() => toggleCategory(category.id, category.is_active)}
-                          className="p-1 text-gray-400 hover:text-pink-500 transition-colors"
-                          title={category.is_active ? 'Deactivate' : 'Activate'}
+                          onClick={() => handleToggleCategory(category.id, category.is_active)}
+                          className={`p-1 rounded ${
+                            category.is_active 
+                              ? 'text-red-500 hover:bg-red-50'
+                              : 'text-green-500 hover:bg-green-50'
+                          }`}
                         >
-                          {category.is_active ? <Ban className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                          {category.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </td>
                     </tr>
