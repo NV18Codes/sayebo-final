@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Heart, Package } from 'lucide-react';
@@ -7,7 +8,7 @@ import { SearchBar } from './SearchBar';
 import { useCart } from '../hooks/useCart';
 
 export const AmazonStyleHeader = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const { cartItems } = useCart();
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ export const AmazonStyleHeader = () => {
                   </>
                 )}
                 <span>|</span>
-                <button onClick={logout} className="hover:underline">
+                <button onClick={signOut} className="hover:underline">
                   Sign Out
                 </button>
               </>
