@@ -14,7 +14,7 @@ export const Header = () => {
   const { cartItems } = useCart();
   const navigate = useNavigate();
 
-  const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const cartItemCount = cartItems?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   const handleSignOut = async () => {
     await signOut();
@@ -59,11 +59,14 @@ export const Header = () => {
             <Link to="/marketplace" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
               Marketplace
             </Link>
-            <Link to="/category/clothing-accessories" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
+            <Link to="/category/fashion" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
               Fashion
             </Link>
-            <Link to="/category/feminine-hygiene" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
-              Wellness
+            <Link to="/category/electronics" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
+              Electronics
+            </Link>
+            <Link to="/category/beauty" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
+              Beauty
             </Link>
             <Link to="/offers" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
               Offers
@@ -224,18 +227,25 @@ export const Header = () => {
                 Marketplace
               </Link>
               <Link
-                to="/category/clothing-accessories"
+                to="/category/fashion"
                 className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Fashion
               </Link>
               <Link
-                to="/category/feminine-hygiene"
+                to="/category/electronics"
                 className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Wellness
+                Electronics
+              </Link>
+              <Link
+                to="/category/beauty"
+                className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Beauty
               </Link>
               <Link
                 to="/offers"
