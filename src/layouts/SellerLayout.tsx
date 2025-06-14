@@ -18,6 +18,7 @@ export const SellerLayout: React.FC<SellerLayoutProps> = ({ children }) => {
   const { profile, loading: profileLoading } = useProfile();
   const location = useLocation();
 
+  // Show loading while checking authentication
   if (authLoading || profileLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 to-sayebo-orange-50 flex items-center justify-center">
@@ -26,12 +27,23 @@ export const SellerLayout: React.FC<SellerLayoutProps> = ({ children }) => {
     );
   }
 
+  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (profile?.role !== 'seller') {
+  // Redirect to home if not a seller
+  if (profile && profile.role !== 'seller') {
     return <Navigate to="/" replace />;
+  }
+
+  // If profile is still loading but user exists, show loading
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 to-sayebo-orange-50 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (

@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SellerLayout } from '../../layouts/SellerLayout';
 import { PageHeader } from '../../components/ui/page-header';
 import { DataTable } from '../../components/ui/data-table';
@@ -25,6 +26,7 @@ const Products: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProducts();
@@ -56,8 +58,35 @@ const Products: React.FC = () => {
   };
 
   const handleAddProduct = () => {
-    // TODO: Implement add product functionality
-    console.log('Add product clicked');
+    navigate('/seller-dashboard/add-product');
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', productId)
+        .eq('seller_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Product deleted successfully",
+      });
+
+      fetchProducts(); // Refresh the list
+    } catch (error: any) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive"
+      });
+    }
   };
 
   const productColumns = [
@@ -104,14 +133,19 @@ const Products: React.FC = () => {
       header: 'Actions',
       render: (product: Product) => (
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" title="View Product">
             <Eye className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" title="Edit Product">
             <Edit className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm">
-            <Trash2 className="w-4 h-4" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            title="Delete Product"
+            onClick={() => handleDeleteProduct(product.id)}
+          >
+            <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700" />
           </Button>
         </div>
       ),
