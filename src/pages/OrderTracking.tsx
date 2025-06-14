@@ -2,32 +2,32 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
-import { ResponsiveContainer } from '../components/ResponsiveContainer';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { Package, Truck, MapPin, CheckCircle, Clock } from 'lucide-react';
+import { ResponsiveContainer } from '../components/ResponsiveContainer';
+import { Package, Truck, CheckCircle, Clock, MapPin } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../integrations/supabase/client';
 import { useToast } from '../hooks/use-toast';
+
+interface OrderStatus {
+  id: string;
+  status: string;
+  description: string | null;
+  created_at: string;
+}
 
 interface Order {
   id: string;
   status: string;
   total_amount: number;
+  shipping_address: string | null;
   created_at: string;
-  shipping_address: string;
-  order_items: {
-    quantity: number;
-    price: number;
-    products: {
-      title: string;
-      image_url: string;
-    };
-  }[];
 }
 
 const OrderTracking = () => {
-  const { orderId } = useParams();
+  const { orderId } = useParams<{ orderId: string }>();
   const [order, setOrder] = useState<Order | null>(null);
+  const [orderStatuses, setOrderStatuses] = useState<OrderStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -39,32 +39,40 @@ const OrderTracking = () => {
       return;
     }
     if (orderId) {
-      fetchOrder();
+      fetchOrderDetails();
     }
   }, [user, orderId, navigate]);
 
-  const fetchOrder = async () => {
+  const fetchOrderDetails = async () => {
     if (!user || !orderId) return;
 
     try {
-      const { data, error } = await supabase
+      // Fetch order details
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .select(`
-          *,
-          order_items(
-            quantity,
-            price,
-            products(title, image_url)
-          )
-        `)
+        .select('*')
         .eq('id', orderId)
         .eq('user_id', user.id)
         .single();
 
-      if (error) throw error;
-      setOrder(data);
+      if (orderError) throw orderError;
+      setOrder(orderData);
+
+      // Fetch order status history
+      const { data: statusData, error: statusError } = await supabase
+        .from('order_status')
+        .select('*')
+        .eq('order_id', orderId)
+        .order('created_at', { ascending: true });
+
+      if (statusError) {
+        console.error('Error fetching order status:', statusError);
+        // Don't throw error for order status, it might not exist yet
+      } else {
+        setOrderStatuses(statusData || []);
+      }
     } catch (error) {
-      console.error('Error fetching order:', error);
+      console.error('Error fetching order details:', error);
       toast({
         title: "Error",
         description: "Failed to load order details",
@@ -75,22 +83,34 @@ const OrderTracking = () => {
     }
   };
 
-  const getStatusSteps = (currentStatus: string) => {
-    const steps = [
-      { key: 'pending', label: 'Order Placed', icon: Package },
-      { key: 'processing', label: 'Processing', icon: Clock },
-      { key: 'shipped', label: 'Shipped', icon: Truck },
-      { key: 'delivered', label: 'Delivered', icon: CheckCircle }
-    ];
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return <Clock className="w-6 h-6 text-yellow-500" />;
+      case 'processing':
+        return <Package className="w-6 h-6 text-blue-500" />;
+      case 'shipped':
+        return <Truck className="w-6 h-6 text-purple-500" />;
+      case 'delivered':
+        return <CheckCircle className="w-6 h-6 text-green-500" />;
+      default:
+        return <Clock className="w-6 h-6 text-gray-500" />;
+    }
+  };
 
-    const statusOrder = ['pending', 'processing', 'shipped', 'delivered'];
-    const currentIndex = statusOrder.indexOf(currentStatus);
-
-    return steps.map((step, index) => ({
-      ...step,
-      completed: index <= currentIndex,
-      active: index === currentIndex
-    }));
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'processing':
+        return 'text-blue-600 bg-blue-100';
+      case 'shipped':
+        return 'text-purple-600 bg-purple-100';
+      case 'delivered':
+        return 'text-green-600 bg-green-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
+    }
   };
 
   if (loading) {
@@ -109,24 +129,24 @@ const OrderTracking = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 to-sayebo-orange-50">
         <Header />
-        <ResponsiveContainer className="pt-24">
-          <div className="text-center py-16">
-            <Package className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Order not found</h2>
-            <p className="text-gray-600 mb-8">The order you're looking for doesn't exist or you don't have permission to view it.</p>
-            <button
-              onClick={() => navigate('/profile')}
-              className="bg-sayebo-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-sayebo-pink-600 transition-colors"
-            >
-              View All Orders
-            </button>
-          </div>
-        </ResponsiveContainer>
+        <main className="pt-20">
+          <ResponsiveContainer className="py-8">
+            <div className="text-center py-16">
+              <Package className="w-24 h-24 text-gray-300 mx-auto mb-6" />
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Order not found</h2>
+              <p className="text-gray-600 mb-8">The order you're looking for doesn't exist or you don't have permission to view it.</p>
+              <button
+                onClick={() => navigate('/orders')}
+                className="bg-sayebo-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-sayebo-pink-600 transition-colors"
+              >
+                View All Orders
+              </button>
+            </div>
+          </ResponsiveContainer>
+        </main>
       </div>
     );
   }
-
-  const statusSteps = getStatusSteps(order.status);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 to-sayebo-orange-50">
@@ -134,99 +154,88 @@ const OrderTracking = () => {
       <main className="pt-20">
         <ResponsiveContainer className="py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Order Tracking</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+              <Package className="w-8 h-8 text-sayebo-pink-500" />
+              Order Tracking
+            </h1>
             <p className="text-gray-600">Order #{order.id.slice(0, 8)}</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Order Status */}
-            <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">Order Status</h2>
-              
-              <div className="space-y-8">
-                {statusSteps.map((step, index) => {
-                  const Icon = step.icon;
-                  return (
-                    <div key={step.key} className="flex items-center">
-                      <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
-                        step.completed 
-                          ? 'bg-sayebo-pink-500 text-white' 
-                          : step.active
-                          ? 'bg-sayebo-orange-500 text-white'
-                          : 'bg-gray-200 text-gray-500'
-                      }`}>
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <div className="ml-4 flex-1">
-                        <h3 className={`font-semibold ${
-                          step.completed || step.active ? 'text-gray-800' : 'text-gray-500'
-                        }`}>
-                          {step.label}
-                        </h3>
-                        {step.active && (
-                          <p className="text-sm text-sayebo-orange-600 font-medium">Current Status</p>
-                        )}
-                      </div>
-                      {index < statusSteps.length - 1 && (
-                        <div className={`absolute left-6 mt-12 w-0.5 h-8 ${
-                          step.completed ? 'bg-sayebo-pink-500' : 'bg-gray-200'
-                        }`} />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Order Details */}
-            <div className="space-y-6">
-              {/* Order Summary */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Order Summary</h3>
-                <div className="space-y-3">
+            {/* Order Summary */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Order Summary</h2>
+                <div className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Order Date:</span>
-                    <span className="font-medium">{new Date(order.created_at).toLocaleDateString()}</span>
+                    <span className="font-medium">
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Amount:</span>
-                    <span className="font-bold text-sayebo-pink-600">R{order.total_amount.toLocaleString()}</span>
+                    <span className="font-bold text-sayebo-pink-500">
+                      R{order.total_amount.toLocaleString()}
+                    </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Items:</span>
-                    <span className="font-medium">{order.order_items.length}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Current Status:</span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status || 'pending')}`}>
+                      {order.status || 'Pending'}
+                    </span>
                   </div>
-                </div>
-              </div>
-
-              {/* Shipping Address */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  Shipping Address
-                </h3>
-                <p className="text-gray-600">{order.shipping_address}</p>
-              </div>
-
-              {/* Items */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Items Ordered</h3>
-                <div className="space-y-4">
-                  {order.order_items.map((item, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <img
-                        src={item.products.image_url || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=300&h=300&fit=crop'}
-                        alt={item.products.title}
-                        className="w-12 h-12 object-cover rounded"
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-800">{item.products.title}</h4>
-                        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                  {order.shipping_address && (
+                    <div>
+                      <span className="text-gray-600 block mb-2">Shipping Address:</span>
+                      <div className="flex items-start gap-2">
+                        <MapPin className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+                        <span className="text-sm">{order.shipping_address}</span>
                       </div>
-                      <span className="font-bold text-sayebo-pink-600">R{item.price.toLocaleString()}</span>
                     </div>
-                  ))}
+                  )}
                 </div>
+              </div>
+            </div>
+
+            {/* Order Timeline */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-6">Order Timeline</h2>
+                
+                {orderStatuses.length > 0 ? (
+                  <div className="space-y-6">
+                    {orderStatuses.map((status, index) => (
+                      <div key={status.id} className="flex items-start gap-4">
+                        <div className="flex-shrink-0">
+                          {getStatusIcon(status.status)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-1">
+                            <h3 className="font-medium text-gray-800 capitalize">
+                              {status.status}
+                            </h3>
+                            <span className="text-sm text-gray-500">
+                              {new Date(status.created_at).toLocaleString()}
+                            </span>
+                          </div>
+                          {status.description && (
+                            <p className="text-gray-600 text-sm">{status.description}</p>
+                          )}
+                        </div>
+                        {index < orderStatuses.length - 1 && (
+                          <div className="absolute left-3 mt-8 w-px h-6 bg-gray-300"></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-800 mb-2">Order Status Pending</h3>
+                    <p className="text-gray-600">Your order is being processed. Status updates will appear here.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

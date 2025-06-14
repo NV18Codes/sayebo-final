@@ -5,7 +5,7 @@ import { Header } from '../components/Header';
 import { ProductCard } from '../components/ProductCard';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ResponsiveContainer } from '../components/ResponsiveContainer';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../integrations/supabase/client';
 import { useToast } from '../hooks/use-toast';
@@ -20,7 +20,7 @@ interface WishlistItem {
     image_url: string;
     category: string;
     stock: number;
-  };
+  } | null;
 }
 
 const Wishlist = () => {
@@ -58,7 +58,10 @@ const Wishlist = () => {
         .eq('user_id', user.id);
 
       if (error) throw error;
-      setWishlistItems(data || []);
+      
+      // Filter out items where the product was deleted
+      const validItems = (data || []).filter(item => item.products !== null) as WishlistItem[];
+      setWishlistItems(validItems);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
       toast({
@@ -136,17 +139,21 @@ const Wishlist = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {wishlistItems.map((item) => (
-                <div key={item.id} className="relative group">
-                  <ProductCard product={item.products} />
-                  <button
-                    onClick={() => removeFromWishlist(item.id)}
-                    className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
-                  >
-                    <Heart className="w-5 h-5 text-sayebo-pink-500 fill-sayebo-pink-500" />
-                  </button>
-                </div>
-              ))}
+              {wishlistItems.map((item) => {
+                if (!item.products) return null;
+                
+                return (
+                  <div key={item.id} className="relative group">
+                    <ProductCard product={item.products} />
+                    <button
+                      onClick={() => removeFromWishlist(item.id)}
+                      className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                      <Heart className="w-5 h-5 text-sayebo-pink-500 fill-sayebo-pink-500" />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </ResponsiveContainer>

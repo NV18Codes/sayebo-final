@@ -43,11 +43,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         .select('id')
         .eq('user_id', user.id)
         .eq('product_id', product.id)
-        .single();
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking wishlist:', error);
+        return;
+      }
 
       setIsInWishlist(!!data);
     } catch (error) {
-      // Item not in wishlist
+      console.error('Error checking wishlist:', error);
       setIsInWishlist(false);
     }
   };
