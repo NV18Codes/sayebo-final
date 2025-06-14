@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, Search, Heart, Shield, LogOut } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Search, Heart, Shield, LogOut, Package, Home, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../hooks/useProfile';
 import { useCart } from '../hooks/useCart';
@@ -9,6 +9,7 @@ import { useCart } from '../hooks/useCart';
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const { cartItems } = useCart();
@@ -19,6 +20,14 @@ export const Header = () => {
   const handleSignOut = async () => {
     await signOut();
     setIsProfileOpen(false);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/marketplace?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
   };
 
   // Close mobile menu when clicking outside
@@ -38,67 +47,94 @@ export const Header = () => {
   }, []);
 
   return (
-    <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
+    <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50 border-b border-pink-100">
+      {/* Top promotional bar */}
+      <div className="bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white py-1">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-center text-sm font-medium">
+            <Sparkles className="w-4 h-4 mr-2" />
+            Free shipping on orders over R500 • Same day delivery in major cities
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-[#FFDAB9] rounded-full flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white fill-white" />
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="w-10 h-10 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+              <Heart className="w-6 h-6 text-white fill-white" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">
+            <span className="text-3xl font-bold bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 bg-clip-text text-transparent">
               Sayebo
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
-              Home
+          <nav className="hidden lg:flex items-center space-x-8">
+            <Link to="/" className="flex items-center space-x-1 text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium group">
+              <Home className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              <span>Home</span>
             </Link>
-            <Link to="/marketplace" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
-              Marketplace
+            <Link to="/marketplace" className="flex items-center space-x-1 text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium group">
+              <Package className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              <span>Marketplace</span>
             </Link>
-            <Link to="/category/fashion" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
-              Fashion
+            <Link to="/category/fashion" className="text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium relative group">
+              <span>Fashion</span>
+              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-sayebo-pink-500 group-hover:w-full transition-all duration-300"></div>
             </Link>
-            <Link to="/category/electronics" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
-              Electronics
+            <Link to="/category/electronics" className="text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium relative group">
+              <span>Electronics</span>
+              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-sayebo-pink-500 group-hover:w-full transition-all duration-300"></div>
             </Link>
-            <Link to="/category/beauty" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
-              Beauty
-            </Link>
-            <Link to="/offers" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
-              Offers
-            </Link>
-            <Link to="/about" className="text-gray-700 hover:text-pink-400 transition-colors font-medium">
-              About
+            <Link to="/category/beauty" className="text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium relative group">
+              <span>Beauty</span>
+              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-sayebo-pink-500 group-hover:w-full transition-all duration-300"></div>
             </Link>
           </nav>
 
           {/* Search Bar (Desktop) */}
-          <div className="hidden lg:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
+          <div className="hidden md:flex flex-1 max-w-md mx-8">
+            <form onSubmit={handleSearch} className="relative w-full group">
               <input
                 type="text"
-                placeholder="Search for products..."
-                className="w-full pl-10 pr-4 py-2 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for products, brands, categories..."
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all duration-300 group-hover:border-sayebo-pink-300"
               />
-              <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-            </div>
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-sayebo-pink-500 transition-colors" />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white p-2 rounded-full hover:shadow-lg transition-all duration-300"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </form>
           </div>
 
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
+            {/* Wishlist */}
+            <Link 
+              to="/wishlist" 
+              className="relative p-3 text-gray-700 hover:text-sayebo-pink-500 transition-colors rounded-full hover:bg-sayebo-pink-50 group"
+              title="Wishlist"
+            >
+              <Heart className="w-6 h-6 group-hover:scale-110 transition-transform" />
+            </Link>
+
             {/* Cart */}
             <Link 
               to="/cart" 
-              className="relative p-2 text-gray-700 hover:text-pink-400 transition-colors"
+              className="relative p-3 text-gray-700 hover:text-sayebo-pink-500 transition-colors rounded-full hover:bg-sayebo-pink-50 group"
+              title="Shopping Cart"
             >
-              <ShoppingCart className="w-6 h-6" />
+              <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" />
               {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-pink-400 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartItemCount}
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold shadow-lg animate-pulse">
+                  {cartItemCount > 99 ? '99+' : cartItemCount}
                 </span>
               )}
             </Link>
@@ -108,9 +144,11 @@ export const Header = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="profile-button flex items-center space-x-2 p-2 text-gray-700 hover:text-pink-400 transition-colors"
+                  className="profile-button flex items-center space-x-3 p-2 text-gray-700 hover:text-sayebo-pink-500 transition-colors rounded-full hover:bg-sayebo-pink-50 group"
                 >
-                  <User className="w-6 h-6" />
+                  <div className="w-8 h-8 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-white" />
+                  </div>
                   {profile && (
                     <span className="hidden md:block text-sm font-medium">
                       {profile.first_name}
@@ -120,65 +158,81 @@ export const Header = () => {
 
                 {/* Profile Dropdown */}
                 {isProfileOpen && (
-                  <div className="profile-dropdown absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="profile-dropdown absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-800">{profile?.first_name} {profile?.last_name}</p>
+                      <p className="text-xs text-gray-500">{user.email}</p>
+                    </div>
+                    
                     <Link
                       to="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                      className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors"
                       onClick={() => setIsProfileOpen(false)}
                     >
-                      <User className="w-4 h-4 inline mr-2" />
+                      <User className="w-4 h-4 mr-3" />
                       My Profile
                     </Link>
                     <Link
                       to="/orders"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                      className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors"
                       onClick={() => setIsProfileOpen(false)}
                     >
-                      <ShoppingCart className="w-4 h-4 inline mr-2" />
+                      <Package className="w-4 h-4 mr-3" />
                       My Orders
                     </Link>
+                    <Link
+                      to="/wishlist"
+                      className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors"
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      <Heart className="w-4 h-4 mr-3" />
+                      Wishlist
+                    </Link>
+                    
                     {profile?.role === 'seller' && (
                       <Link
-                        to="/seller"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                        to="/seller-dashboard"
+                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors"
                         onClick={() => setIsProfileOpen(false)}
                       >
-                        <Shield className="w-4 h-4 inline mr-2" />
+                        <Shield className="w-4 h-4 mr-3" />
                         Seller Dashboard
                       </Link>
                     )}
+                    
                     {profile?.role === 'admin' && (
                       <Link
-                        to="/admin"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                        to="/admin/dashboard"
+                        className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors"
                         onClick={() => setIsProfileOpen(false)}
                       >
-                        <Shield className="w-4 h-4 inline mr-2" />
+                        <Shield className="w-4 h-4 mr-3" />
                         Admin Dashboard
                       </Link>
                     )}
-                    <hr className="my-2" />
+                    
+                    <hr className="my-2 border-gray-100" />
                     <button
                       onClick={handleSignOut}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                      className="w-full flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
                     >
-                      <LogOut className="w-4 h-4 inline mr-2" />
+                      <LogOut className="w-4 h-4 mr-3" />
                       Sign Out
                     </button>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-pink-400 transition-colors font-medium"
+                  className="text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium px-4 py-2 rounded-full hover:bg-sayebo-pink-50"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-pink-400 text-white px-4 py-2 rounded-full hover:bg-pink-500 transition-colors font-medium"
+                  className="bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white px-6 py-2 rounded-full hover:shadow-lg transition-all duration-300 font-medium transform hover:scale-105"
                 >
                   Sign Up
                 </Link>
@@ -188,7 +242,7 @@ export const Header = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="menu-button md:hidden p-2 text-gray-700 hover:text-pink-400 transition-colors"
+              className="menu-button lg:hidden p-2 text-gray-700 hover:text-sayebo-pink-500 transition-colors rounded-full hover:bg-sayebo-pink-50"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -197,69 +251,59 @@ export const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="mobile-menu md:hidden border-t border-gray-200 py-4">
+          <div className="mobile-menu lg:hidden border-t border-gray-200 py-4 bg-white shadow-lg rounded-b-xl">
             {/* Mobile Search */}
             <div className="px-4 pb-4">
-              <div className="relative">
+              <form onSubmit={handleSearch} className="relative">
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for products..."
-                  className="w-full pl-10 pr-4 py-2 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300"
                 />
-                <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-              </div>
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              </form>
             </div>
 
             {/* Mobile Navigation */}
-            <nav className="space-y-2">
+            <nav className="space-y-1">
               <Link
                 to="/"
-                className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                className="flex items-center px-4 py-3 text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
+                <Home className="w-5 h-5 mr-3" />
                 Home
               </Link>
               <Link
                 to="/marketplace"
-                className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                className="flex items-center px-4 py-3 text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
+                <Package className="w-5 h-5 mr-3" />
                 Marketplace
               </Link>
               <Link
                 to="/category/fashion"
-                className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                className="block px-4 py-3 text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Fashion
               </Link>
               <Link
                 to="/category/electronics"
-                className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                className="block px-4 py-3 text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Electronics
               </Link>
               <Link
                 to="/category/beauty"
-                className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
+                className="block px-4 py-3 text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Beauty
-              </Link>
-              <Link
-                to="/offers"
-                className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Offers
-              </Link>
-              <Link
-                to="/about"
-                className="block px-4 py-2 text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
               </Link>
             </nav>
           </div>

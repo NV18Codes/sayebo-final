@@ -1,115 +1,83 @@
 
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { Header } from '../components/Header';
-import { User, Package, Settings, LogOut, Edit, MapPin, Phone, Mail } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Edit3, Save, Camera, Shield, Package, Heart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../hooks/useProfile';
+import { useToast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 
-interface Order {
-  id: string;
-  created_at: string;
-  status: string;
-  total_amount: number;
-  order_items: {
-    quantity: number;
-    product: {
-      title: string;
-    };
-  }[];
-}
-
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState('profile');
-  const [orders, setOrders] = useState<Order[]>([]);
+  const { user } = useAuth();
+  const { profile, refetch } = useProfile();
+  const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [profileForm, setProfileForm] = useState({
-    first_name: '',
-    last_name: '',
-    phone: ''
+  const [formData, setFormData] = useState({
+    first_name: profile?.first_name || '',
+    last_name: profile?.last_name || '',
+    phone: profile?.phone || '',
+    address: profile?.address || '',
+    city: profile?.city || '',
+    postal_code: profile?.postal_code || '',
   });
 
-  const { user, signOut } = useAuth();
-  const { profile, updateProfile } = useProfile();
-  const navigate = useNavigate();
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    
-    if (profile) {
-      setProfileForm({
-        first_name: profile.first_name || '',
-        last_name: profile.last_name || '',
-        phone: profile.phone || ''
-      });
-    }
-
-    fetchOrders();
-  }, [user, profile, navigate]);
-
-  const fetchOrders = async () => {
+  const handleSave = async () => {
     if (!user) return;
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          id,
-          created_at,
-          status,
-          total_amount,
-          order_items(
-            quantity,
-            product:products(title)
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      const { error } = await supabase
+        .from('profiles')
+        .update(formData)
+        .eq('id', user.id);
 
       if (error) throw error;
-      setOrders(data || []);
-    } catch (error) {
-      console.error('Error fetching orders:', error);
+
+      await refetch();
+      setIsEditing(false);
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been successfully updated."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleProfileUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await updateProfile(profileForm);
-    setEditMode(false);
+  const handleCancel = () => {
+    setFormData({
+      first_name: profile?.first_name || '',
+      last_name: profile?.last_name || '',
+      phone: profile?.phone || '',
+      address: profile?.address || '',
+      city: profile?.city || '',
+      postal_code: profile?.postal_code || '',
+    });
+    setIsEditing(false);
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'delivered': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'shipped': return 'bg-blue-100 text-blue-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  if (!profile) {
+  if (!user || !profile) {
     return (
-      <div className="min-h-screen gradient-bg">
+      <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 via-white to-sayebo-orange-50">
         <Header />
         <div className="pt-24 flex items-center justify-center">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-pink-300 border-t-transparent"></div>
-            <p className="mt-4 text-pink-400 font-medium">Loading profile...</p>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-sayebo-pink-300 border-t-transparent"></div>
+            <p className="mt-4 text-sayebo-pink-500 font-medium">Loading profile...</p>
           </div>
         </div>
       </div>
@@ -117,265 +85,288 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen gradient-bg">
+    <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 via-white to-sayebo-orange-50">
       <Header />
-      <main className="pt-20 max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <User className="w-10 h-10 text-pink-400" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-800">{profile.first_name} {profile.last_name}</h2>
-                <p className="text-gray-600">{profile.email}</p>
-                <span className="inline-block px-3 py-1 bg-pink-100 text-pink-800 rounded-full text-sm font-medium mt-2">
-                  {profile.role}
+      <main className="pt-24 max-w-4xl mx-auto px-4 py-8">
+        {/* Profile Header */}
+        <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-gray-100">
+          <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
+            {/* Profile Picture */}
+            <div className="relative">
+              <div className="w-32 h-32 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                <User className="w-16 h-16 text-white" />
+              </div>
+              <button className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
+                <Camera className="w-4 h-4 text-gray-600" />
+              </button>
+            </div>
+            
+            {/* Profile Info */}
+            <div className="flex-1 text-center md:text-left">
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                {profile.first_name} {profile.last_name}
+              </h1>
+              <p className="text-gray-600 mb-4">{user.email}</p>
+              <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  profile.role === 'seller' 
+                    ? 'bg-purple-100 text-purple-700' 
+                    : profile.role === 'admin'
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {profile.role === 'seller' ? '🛍️ Seller' : profile.role === 'admin' ? '👑 Admin' : '🛒 Customer'}
+                </span>
+                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                  ✅ Verified
                 </span>
               </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex space-x-3">
+              {!isEditing ? (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center space-x-2 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  <span>Edit Profile</span>
+                </button>
+              ) : (
+                <div className="flex space-x-2">
+                  <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    className="flex items-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-xl hover:bg-green-600 transition-colors disabled:opacity-50"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>{loading ? 'Saving...' : 'Save'}</span>
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    disabled={loading}
+                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Personal Information */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <User className="w-6 h-6 mr-3 text-sayebo-pink-500" />
+                Personal Information
+              </h2>
               
-              <nav className="space-y-2">
-                <button
-                  onClick={() => setActiveTab('profile')}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === 'profile' 
-                      ? 'bg-pink-50 text-pink-400 border border-pink-200' 
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  <User className="w-5 h-5" />
-                  <span>Profile</span>
-                </button>
-                
-                <button
-                  onClick={() => setActiveTab('orders')}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === 'orders' 
-                      ? 'bg-pink-50 text-pink-400 border border-pink-200' 
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  <Package className="w-5 h-5" />
-                  <span>My Orders</span>
-                </button>
-                
-                <button
-                  onClick={() => setActiveTab('settings')}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === 'settings' 
-                      ? 'bg-pink-50 text-pink-400 border border-pink-200' 
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  <Settings className="w-5 h-5" />
-                  <span>Settings</span>
-                </button>
-                
-                <button 
-                  onClick={handleSignOut}
-                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span>Sign Out</span>
-                </button>
-              </nav>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    First Name
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="first_name"
+                      value={formData.first_name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all"
+                    />
+                  ) : (
+                    <div className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800">
+                      {profile.first_name || 'Not provided'}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Last Name
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="last_name"
+                      value={formData.last_name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all"
+                    />
+                  ) : (
+                    <div className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800">
+                      {profile.last_name || 'Not provided'}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Email Address
+                  </label>
+                  <div className="w-full px-4 py-3 bg-gray-100 rounded-xl text-gray-600 flex items-center">
+                    <Mail className="w-4 h-4 mr-2" />
+                    {user.email}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Phone Number
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all"
+                      placeholder="+27 XX XXX XXXX"
+                    />
+                  ) : (
+                    <div className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800 flex items-center">
+                      <Phone className="w-4 h-4 mr-2 text-gray-400" />
+                      {profile.phone || 'Not provided'}
+                    </div>
+                  )}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Address
+                  </label>
+                  {isEditing ? (
+                    <textarea
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      rows={3}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all resize-none"
+                      placeholder="Enter your full address"
+                    />
+                  ) : (
+                    <div className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800 flex items-start">
+                      <MapPin className="w-4 h-4 mr-2 mt-1 text-gray-400" />
+                      {profile.address || 'Not provided'}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    City
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all"
+                    />
+                  ) : (
+                    <div className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800">
+                      {profile.city || 'Not provided'}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Postal Code
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="postal_code"
+                      value={formData.postal_code}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all"
+                    />
+                  ) : (
+                    <div className="w-full px-4 py-3 bg-gray-50 rounded-xl text-gray-800">
+                      {profile.postal_code || 'Not provided'}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Content Area */}
-          <div className="lg:col-span-3">
-            {activeTab === 'profile' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h1 className="text-2xl font-bold text-gray-800">Profile Information</h1>
-                  <button 
-                    onClick={() => setEditMode(!editMode)}
-                    className="flex items-center space-x-2 text-pink-400 hover:text-pink-500"
+          {/* Quick Actions & Stats */}
+          <div className="space-y-6">
+            {/* Account Stats */}
+            <div className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Account Stats</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Calendar className="w-5 h-5 text-sayebo-pink-500" />
+                    <span className="text-sm text-gray-600">Member since</span>
+                  </div>
+                  <span className="text-sm font-medium">
+                    {new Date(profile.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Package className="w-5 h-5 text-blue-500" />
+                    <span className="text-sm text-gray-600">Total Orders</span>
+                  </div>
+                  <span className="text-sm font-medium">12</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Heart className="w-5 h-5 text-red-500" />
+                    <span className="text-sm text-gray-600">Wishlist Items</span>
+                  </div>
+                  <span className="text-sm font-medium">5</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <a
+                  href="/orders"
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-sayebo-pink-50 transition-colors group"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Package className="w-5 h-5 text-gray-600 group-hover:text-sayebo-pink-500" />
+                    <span className="text-sm font-medium">View Orders</span>
+                  </div>
+                  <span className="text-xs text-gray-400">→</span>
+                </a>
+                <a
+                  href="/wishlist"
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-sayebo-pink-50 transition-colors group"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Heart className="w-5 h-5 text-gray-600 group-hover:text-sayebo-pink-500" />
+                    <span className="text-sm font-medium">Wishlist</span>
+                  </div>
+                  <span className="text-xs text-gray-400">→</span>
+                </a>
+                {profile.role === 'seller' && (
+                  <a
+                    href="/seller-dashboard"
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-purple-50 transition-colors group"
                   >
-                    <Edit className="w-4 h-4" />
-                    <span>{editMode ? 'Cancel' : 'Edit'}</span>
-                  </button>
-                </div>
-                
-                {editMode ? (
-                  <form onSubmit={handleProfileUpdate} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                        <input
-                          type="text"
-                          value={profileForm.first_name}
-                          onChange={(e) => setProfileForm({...profileForm, first_name: e.target.value})}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                        <input
-                          type="text"
-                          value={profileForm.last_name}
-                          onChange={(e) => setProfileForm({...profileForm, last_name: e.target.value})}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
-                        />
-                      </div>
+                    <div className="flex items-center space-x-3">
+                      <Shield className="w-5 h-5 text-gray-600 group-hover:text-purple-500" />
+                      <span className="text-sm font-medium">Seller Dashboard</span>
                     </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                      <input
-                        type="tel"
-                        value={profileForm.phone}
-                        onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
-                      />
-                    </div>
-                    
-                    <button type="submit" className="btn-primary">
-                      Update Profile
-                    </button>
-                  </form>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                          <User className="w-5 h-5 text-gray-400" />
-                          <span className="text-gray-800">{profile.first_name || 'Not set'}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                          <User className="w-5 h-5 text-gray-400" />
-                          <span className="text-gray-800">{profile.last_name || 'Not set'}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <Mail className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-800">{profile.email}</span>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <Phone className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-800">{profile.phone || 'Not set'}</span>
-                      </div>
-                    </div>
-                  </div>
+                    <span className="text-xs text-gray-400">→</span>
+                  </a>
                 )}
               </div>
-            )}
-
-            {activeTab === 'orders' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h1 className="text-2xl font-bold text-gray-800 mb-6">My Orders</h1>
-                
-                {loading ? (
-                  <div className="text-center py-8">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-pink-300 border-t-transparent"></div>
-                    <p className="mt-2 text-gray-600">Loading orders...</p>
-                  </div>
-                ) : orders.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500 text-lg">No orders found</p>
-                    <p className="text-gray-400 mb-6">Start shopping to see your orders here</p>
-                    <button
-                      onClick={() => navigate('/products')}
-                      className="btn-primary"
-                    >
-                      Start Shopping
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {orders.map((order) => (
-                      <div key={order.id} className="border border-gray-200 rounded-lg p-4 hover:border-pink-200 transition-colors">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h3 className="font-semibold text-gray-800">Order #{order.id.slice(0, 8)}</h3>
-                            <p className="text-sm text-gray-600">{new Date(order.created_at).toLocaleDateString()}</p>
-                          </div>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                            {order.status}
-                          </span>
-                        </div>
-                        
-                        <div className="mb-3">
-                          <p className="text-sm text-gray-600 mb-1">Items:</p>
-                          {order.order_items.map((item, index) => (
-                            <p key={index} className="text-sm text-gray-800">
-                              {item.quantity}x {item.product.title}
-                            </p>
-                          ))}
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="text-sm text-gray-600">
-                            {order.order_items.length} item{order.order_items.length > 1 ? 's' : ''}
-                          </div>
-                          <div className="text-lg font-bold text-pink-400">
-                            R{order.total_amount.toLocaleString()}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'settings' && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h1 className="text-2xl font-bold text-gray-800 mb-6">Account Settings</h1>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Notifications</h3>
-                    <div className="space-y-3">
-                      <label className="flex items-center justify-between">
-                        <span className="text-gray-700">Email notifications</span>
-                        <input type="checkbox" defaultChecked className="rounded border-gray-300 text-pink-400 focus:ring-pink-300" />
-                      </label>
-                      <label className="flex items-center justify-between">
-                        <span className="text-gray-700">SMS notifications</span>
-                        <input type="checkbox" className="rounded border-gray-300 text-pink-400 focus:ring-pink-300" />
-                      </label>
-                      <label className="flex items-center justify-between">
-                        <span className="text-gray-700">Marketing emails</span>
-                        <input type="checkbox" defaultChecked className="rounded border-gray-300 text-pink-400 focus:ring-pink-300" />
-                      </label>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Privacy</h3>
-                    <div className="space-y-3">
-                      <label className="flex items-center justify-between">
-                        <span className="text-gray-700">Make profile public</span>
-                        <input type="checkbox" className="rounded border-gray-300 text-pink-400 focus:ring-pink-300" />
-                      </label>
-                      <label className="flex items-center justify-between">
-                        <span className="text-gray-700">Share purchase history</span>
-                        <input type="checkbox" className="rounded border-gray-300 text-pink-400 focus:ring-pink-300" />
-                      </label>
-                    </div>
-                  </div>
-                  
-                  <button className="btn-primary">
-                    Save Settings
-                  </button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </main>
