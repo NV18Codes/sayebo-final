@@ -19,7 +19,7 @@ export const AmazonStyleHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { user, signOut } = useAuth();
-  const { items } = useCart();
+  const { cartItems } = useCart();
   const navigate = useNavigate();
 
   const categories = [
@@ -138,9 +138,9 @@ export const AmazonStyleHeader = () => {
                 >
                   <ShoppingCart className="w-6 h-6" />
                   <span className="hidden lg:block">Cart</span>
-                  {items.length > 0 && (
+                  {cartItems.length > 0 && (
                     <span className="absolute -top-2 -right-2 w-5 h-5 bg-sayebo-orange-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {items.length}
+                      {cartItems.length}
                     </span>
                   )}
                 </Link>
@@ -240,7 +240,7 @@ export const AmazonStyleHeader = () => {
                   className="block text-gray-700 hover:text-sayebo-pink-600 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Cart ({items.length})
+                  Cart ({cartItems.length})
                 </Link>
                 <Link
                   to="/profile"
