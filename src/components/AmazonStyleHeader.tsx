@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../hooks/useProfile';
 import { SearchBar } from './SearchBar';
 import { useCart } from '../hooks/useCart';
+import { MobileNav } from './ui/mobile-nav';
 
 export const AmazonStyleHeader = () => {
   const { user, signOut } = useAuth();
@@ -18,7 +19,7 @@ export const AmazonStyleHeader = () => {
       {/* Top bar */}
       <div className="bg-gradient-to-r from-sayebo-orange-800 to-sayebo-pink-800 py-1">
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center text-sm">
-          <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4">
             <span>🇿🇦 Deliver to South Africa</span>
             <span>|</span>
             <span>Free shipping on orders over R500</span>
@@ -26,10 +27,10 @@ export const AmazonStyleHeader = () => {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <span>Hello, {user.email}</span>
+                <span className="hidden md:inline">Hello, {user.email}</span>
                 {profile?.role === 'seller' && (
                   <>
-                    <span>|</span>
+                    <span className="hidden md:inline">|</span>
                     <Link to="/seller-dashboard" className="hover:underline">
                       Seller Dashboard
                     </Link>
@@ -37,13 +38,13 @@ export const AmazonStyleHeader = () => {
                 )}
                 {profile?.role === 'admin' && (
                   <>
-                    <span>|</span>
+                    <span className="hidden md:inline">|</span>
                     <Link to="/admin/dashboard" className="hover:underline">
                       Admin Dashboard
                     </Link>
                   </>
                 )}
-                <span>|</span>
+                <span className="hidden md:inline">|</span>
                 <button onClick={signOut} className="hover:underline">
                   Sign Out
                 </button>
@@ -51,7 +52,7 @@ export const AmazonStyleHeader = () => {
             ) : (
               <>
                 <Link to="/login" className="hover:underline">Sign In</Link>
-                <span>|</span>
+                <span className="hidden md:inline">|</span>
                 <Link to="/register" className="hover:underline">Create Account</Link>
               </>
             )}
@@ -69,21 +70,21 @@ export const AmazonStyleHeader = () => {
             </div>
           </Link>
 
-          {/* Search bar */}
-          <div className="flex-1 max-w-2xl mx-8">
+          {/* Search bar - hidden on mobile */}
+          <div className="hidden md:flex flex-1 max-w-2xl mx-8">
             <SearchBar />
           </div>
 
-          {/* Right section */}
-          <div className="flex items-center space-x-6">
+          {/* Desktop navigation */}
+          <div className="hidden md:flex items-center space-x-6">
             <Link to="/wishlist" className="flex items-center space-x-1 hover:text-sayebo-pink-300 transition-colors">
               <Heart className="w-5 h-5" />
-              <span className="hidden md:inline">Wishlist</span>
+              <span>Wishlist</span>
             </Link>
 
             <Link to="/cart" className="flex items-center space-x-1 hover:text-sayebo-pink-300 transition-colors relative">
               <ShoppingCart className="w-5 h-5" />
-              <span className="hidden md:inline">Cart</span>
+              <span>Cart</span>
               {cartItems.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-sayebo-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {cartItems.length}
@@ -91,6 +92,14 @@ export const AmazonStyleHeader = () => {
               )}
             </Link>
           </div>
+
+          {/* Mobile navigation */}
+          <MobileNav />
+        </div>
+
+        {/* Mobile search bar */}
+        <div className="md:hidden mt-3">
+          <SearchBar />
         </div>
       </div>
 
