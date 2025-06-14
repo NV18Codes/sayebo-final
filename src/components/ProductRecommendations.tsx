@@ -30,7 +30,7 @@ export const ProductRecommendations = ({
 }: ProductRecommendationsProps) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -67,9 +67,9 @@ export const ProductRecommendations = ({
     }
   };
 
-  const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+  const handleAddToCart = async (product: Product, e: React.MouseEvent) => {
     e.stopPropagation();
-    addItem(product);
+    await addToCart(product.id, 1);
     toast({
       title: "Added to cart",
       description: `${product.title} has been added to your cart.`

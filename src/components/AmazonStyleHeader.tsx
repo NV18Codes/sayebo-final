@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, ShoppingCart, User, Menu, MapPin, Package, Heart, Bell } from 'lucide-react';
@@ -12,11 +11,11 @@ export const AmazonStyleHeader = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
-  const { items } = useCart();
+  const { cartItems } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const cartItemCount = items.reduce((total, item) => total + item.quantity, 0);
+  const cartItemCount = cartItems?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
