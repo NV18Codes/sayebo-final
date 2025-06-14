@@ -11,6 +11,7 @@ interface Profile {
   last_name: string;
   phone: string;
   role: 'buyer' | 'seller' | 'admin';
+  created_at: string;
 }
 
 export const useProfile = () => {
