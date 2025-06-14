@@ -44,7 +44,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 via-white to-sayebo-orange-50">
       <Header />
-      <main className="pt-24 flex items-center justify-center px-4 py-16">
+      <main className="pt-32 flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md">
           {/* Welcome Card */}
           <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 backdrop-blur-sm">

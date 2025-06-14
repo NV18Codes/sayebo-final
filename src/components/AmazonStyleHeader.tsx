@@ -60,11 +60,11 @@ export const AmazonStyleHeader = () => {
         </div>
       </div>
 
-      {/* Main header */}
+      {/* Main header with better spacing */}
       <div className="max-w-7xl mx-auto px-4 py-4 bg-white">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          {/* Logo with improved spacing */}
+          <Link to="/" className="flex items-center space-x-3 mr-8">
             <div className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
               Sayebo
             </div>
@@ -75,14 +75,14 @@ export const AmazonStyleHeader = () => {
             <SearchBar />
           </div>
 
-          {/* Desktop navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link to="/wishlist" className="flex items-center space-x-1 hover:text-pink-500 transition-colors text-gray-700">
+          {/* Desktop navigation with better spacing */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link to="/wishlist" className="flex items-center space-x-2 hover:text-pink-500 transition-colors text-gray-700">
               <Heart className="w-5 h-5" />
               <span>Wishlist</span>
             </Link>
 
-            <Link to="/cart" className="flex items-center space-x-1 hover:text-pink-500 transition-colors relative text-gray-700">
+            <Link to="/cart" className="flex items-center space-x-2 hover:text-pink-500 transition-colors relative text-gray-700">
               <ShoppingCart className="w-5 h-5" />
               <span>Cart</span>
               {cartItems.length > 0 && (
@@ -103,11 +103,11 @@ export const AmazonStyleHeader = () => {
         </div>
       </div>
 
-      {/* Navigation categories */}
+      {/* Navigation categories with improved spacing */}
       <nav className="bg-gradient-to-r from-pink-100 to-peach-100 py-3 border-t border-pink-200">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center space-x-8 overflow-x-auto">
-            <Link to="/marketplace" className="whitespace-nowrap hover:text-pink-600 transition-colors flex items-center space-x-1 text-gray-700">
+          <div className="flex items-center space-x-10 overflow-x-auto">
+            <Link to="/marketplace" className="whitespace-nowrap hover:text-pink-600 transition-colors flex items-center space-x-2 text-gray-700">
               <Package className="w-4 h-4" />
               <span>All Products</span>
             </Link>

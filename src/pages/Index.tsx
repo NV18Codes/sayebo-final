@@ -6,7 +6,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <AmazonStyleHeader />
-      <main>
+      <main className="pt-32">
         <AmazonStyleHomepage />
       </main>
     </div>

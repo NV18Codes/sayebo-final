@@ -68,7 +68,7 @@ const Profile = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 via-white to-sayebo-orange-50">
         <Header />
-        <div className="pt-24 flex items-center justify-center">
+        <div className="pt-32 flex items-center justify-center">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-sayebo-pink-300 border-t-transparent"></div>
             <p className="mt-4 text-sayebo-pink-500 font-medium">Loading profile...</p>
@@ -81,7 +81,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sayebo-pink-50 via-white to-sayebo-orange-50">
       <Header />
-      <main className="pt-24 max-w-4xl mx-auto px-4 py-8">
+      <main className="pt-32 max-w-4xl mx-auto px-4 py-8">
         {/* Profile Header */}
         <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-gray-100">
           <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">

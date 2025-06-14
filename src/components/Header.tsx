@@ -49,7 +49,7 @@ export const Header = () => {
   return (
     <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50 border-b border-pink-100">
       {/* Top promotional bar */}
-      <div className="bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white py-1">
+      <div className="bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white py-2">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-center text-sm font-medium">
             <Sparkles className="w-4 h-4 mr-2" />
@@ -58,64 +58,64 @@ export const Header = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-              <Heart className="w-6 h-6 text-white fill-white" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo with better spacing */}
+          <Link to="/" className="flex items-center space-x-3 group mr-8">
+            <div className="w-12 h-12 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+              <Heart className="w-7 h-7 text-white fill-white" />
             </div>
             <span className="text-3xl font-bold bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 bg-clip-text text-transparent">
               Sayebo
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
-            <Link to="/" className="flex items-center space-x-1 text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium group">
-              <Home className="w-4 h-4 group-hover:scale-110 transition-transform" />
+          {/* Desktop Navigation with proper spacing */}
+          <nav className="hidden lg:flex items-center space-x-10 mr-8">
+            <Link to="/" className="flex items-center space-x-2 text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium group">
+              <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
               <span>Home</span>
             </Link>
-            <Link to="/marketplace" className="flex items-center space-x-1 text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium group">
-              <Package className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            <Link to="/marketplace" className="flex items-center space-x-2 text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium group">
+              <Package className="w-5 h-5 group-hover:scale-110 transition-transform" />
               <span>Marketplace</span>
             </Link>
             <Link to="/category/fashion" className="text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium relative group">
               <span>Fashion</span>
-              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-sayebo-pink-500 group-hover:w-full transition-all duration-300"></div>
+              <div className="absolute -bottom-2 left-0 w-0 h-0.5 bg-sayebo-pink-500 group-hover:w-full transition-all duration-300"></div>
             </Link>
             <Link to="/category/electronics" className="text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium relative group">
               <span>Electronics</span>
-              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-sayebo-pink-500 group-hover:w-full transition-all duration-300"></div>
+              <div className="absolute -bottom-2 left-0 w-0 h-0.5 bg-sayebo-pink-500 group-hover:w-full transition-all duration-300"></div>
             </Link>
             <Link to="/category/beauty" className="text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium relative group">
               <span>Beauty</span>
-              <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-sayebo-pink-500 group-hover:w-full transition-all duration-300"></div>
+              <div className="absolute -bottom-2 left-0 w-0 h-0.5 bg-sayebo-pink-500 group-hover:w-full transition-all duration-300"></div>
             </Link>
           </nav>
 
-          {/* Search Bar (Desktop) */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          {/* Search Bar (Desktop) with improved spacing */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-6">
             <form onSubmit={handleSearch} className="relative w-full group">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for products, brands, categories..."
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all duration-300 group-hover:border-sayebo-pink-300"
+                className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-sayebo-pink-300 focus:border-sayebo-pink-400 transition-all duration-300 group-hover:border-sayebo-pink-300 bg-gray-50 focus:bg-white"
               />
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 group-hover:text-sayebo-pink-500 transition-colors" />
               <button
                 type="submit"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white p-2 rounded-full hover:shadow-lg transition-all duration-300"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white p-2.5 rounded-full hover:shadow-lg transition-all duration-300 transform hover:scale-105"
               >
                 <Search className="w-4 h-4" />
               </button>
             </form>
           </div>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
+          {/* Right Side Actions with improved spacing */}
+          <div className="flex items-center space-x-3">
             {/* Wishlist */}
             <Link 
               to="/wishlist" 
@@ -146,7 +146,7 @@ export const Header = () => {
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="profile-button flex items-center space-x-3 p-2 text-gray-700 hover:text-sayebo-pink-500 transition-colors rounded-full hover:bg-sayebo-pink-50 group"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 rounded-full flex items-center justify-center">
+                  <div className="w-9 h-9 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 rounded-full flex items-center justify-center shadow-md">
                     <User className="w-5 h-5 text-white" />
                   </div>
                   {profile && (
@@ -158,9 +158,9 @@ export const Header = () => {
 
                 {/* Profile Dropdown */}
                 {isProfileOpen && (
-                  <div className="profile-dropdown absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-800">{profile?.first_name} {profile?.last_name}</p>
+                  <div className="profile-dropdown absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
+                    <div className="px-4 py-4 border-b border-gray-100 bg-gradient-to-r from-sayebo-pink-50 to-sayebo-orange-50">
+                      <p className="text-sm font-semibold text-gray-800">{profile?.first_name} {profile?.last_name}</p>
                       <p className="text-xs text-gray-500">{user.email}</p>
                     </div>
                     
@@ -223,7 +223,7 @@ export const Header = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-4">
                 <Link
                   to="/login"
                   className="text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium px-4 py-2 rounded-full hover:bg-sayebo-pink-50"
@@ -232,7 +232,7 @@ export const Header = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white px-6 py-2 rounded-full hover:shadow-lg transition-all duration-300 font-medium transform hover:scale-105"
+                  className="bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white px-6 py-2.5 rounded-full hover:shadow-lg transition-all duration-300 font-medium transform hover:scale-105"
                 >
                   Sign Up
                 </Link>
