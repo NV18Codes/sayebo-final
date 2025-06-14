@@ -53,7 +53,18 @@ export const ProductAttributes: React.FC<ProductAttributesProps> = ({
         .order('display_order');
 
       if (error) throw error;
-      setAttributes(data || []);
+      
+      // Transform the data to match our interface
+      const transformedData = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        options: Array.isArray(item.options) ? item.options as string[] : null,
+        required: item.required || false,
+        display_order: item.display_order || 0
+      }));
+      
+      setAttributes(transformedData);
     } catch (error) {
       console.error('Error fetching attributes:', error);
     }

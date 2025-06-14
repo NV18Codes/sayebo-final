@@ -55,7 +55,16 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         .order('display_order');
 
       if (error) throw error;
-      setFilterOptions(data || []);
+      
+      // Transform the data to match our interface
+      const transformedData = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        options: Array.isArray(item.options) ? item.options as string[] : null
+      }));
+      
+      setFilterOptions(transformedData);
     } catch (error) {
       console.error('Error fetching filter options:', error);
     }

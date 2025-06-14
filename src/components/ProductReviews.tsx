@@ -12,10 +12,7 @@ interface Review {
   comment: string | null;
   verified_purchase: boolean;
   created_at: string;
-  profiles?: {
-    first_name: string;
-    last_name: string;
-  };
+  user_id: string;
 }
 
 interface ProductReviewsProps {
@@ -42,10 +39,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
     try {
       const { data, error } = await supabase
         .from('product_reviews')
-        .select(`
-          *,
-          profiles(first_name, last_name)
-        `)
+        .select('*')
         .eq('product_id', productId)
         .order('created_at', { ascending: false });
 
@@ -223,7 +217,7 @@ export const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => 
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
                       <span className="font-medium text-gray-800">
-                        {review.profiles?.first_name} {review.profiles?.last_name}
+                        Anonymous User
                       </span>
                       {review.verified_purchase && (
                         <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
