@@ -15,9 +15,9 @@ export const AmazonStyleHeader = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="bg-gradient-to-r from-sayebo-orange-900 to-sayebo-pink-900 text-white shadow-lg fixed top-0 w-full z-50">
+    <header className="bg-gradient-to-r from-sayebo-orange-900 to-sayebo-orange-800 text-white shadow-lg fixed top-0 w-full z-50">
       {/* Top bar */}
-      <div className="bg-gradient-to-r from-sayebo-orange-800 to-sayebo-pink-800 py-1">
+      <div className="bg-sayebo-orange-800 py-2">
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center text-sm">
           <div className="hidden md:flex items-center space-x-4">
             <span>🇿🇦 Deliver to South Africa</span>
@@ -61,11 +61,11 @@ export const AmazonStyleHeader = () => {
       </div>
 
       {/* Main header */}
-      <div className="max-w-7xl mx-auto px-4 py-3">
+      <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold bg-gradient-to-r from-sayebo-pink-300 to-sayebo-orange-300 bg-clip-text text-transparent">
+            <div className="text-3xl font-bold text-white">
               Sayebo
             </div>
           </Link>
@@ -77,12 +77,12 @@ export const AmazonStyleHeader = () => {
 
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/wishlist" className="flex items-center space-x-1 hover:text-sayebo-pink-300 transition-colors">
+            <Link to="/wishlist" className="flex items-center space-x-1 hover:text-sayebo-orange-200 transition-colors">
               <Heart className="w-5 h-5" />
               <span>Wishlist</span>
             </Link>
 
-            <Link to="/cart" className="flex items-center space-x-1 hover:text-sayebo-pink-300 transition-colors relative">
+            <Link to="/cart" className="flex items-center space-x-1 hover:text-sayebo-orange-200 transition-colors relative">
               <ShoppingCart className="w-5 h-5" />
               <span>Cart</span>
               {cartItems.length > 0 && (
@@ -104,20 +104,20 @@ export const AmazonStyleHeader = () => {
       </div>
 
       {/* Navigation categories */}
-      <nav className="bg-gradient-to-r from-sayebo-orange-700 to-sayebo-pink-700 py-2">
+      <nav className="bg-sayebo-orange-700 py-3">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center space-x-8 overflow-x-auto">
-            <Link to="/marketplace" className="whitespace-nowrap hover:text-sayebo-pink-300 transition-colors flex items-center space-x-1">
+            <Link to="/marketplace" className="whitespace-nowrap hover:text-sayebo-orange-200 transition-colors flex items-center space-x-1">
               <Package className="w-4 h-4" />
               <span>All Products</span>
             </Link>
-            <Link to="/category/Electronics" className="whitespace-nowrap hover:text-sayebo-pink-300 transition-colors">Electronics</Link>
-            <Link to="/category/Fashion" className="whitespace-nowrap hover:text-sayebo-pink-300 transition-colors">Fashion</Link>
-            <Link to="/category/Home & Garden" className="whitespace-nowrap hover:text-sayebo-pink-300 transition-colors">Home & Garden</Link>
-            <Link to="/category/Sports" className="whitespace-nowrap hover:text-sayebo-pink-300 transition-colors">Sports</Link>
-            <Link to="/category/Books" className="whitespace-nowrap hover:text-sayebo-pink-300 transition-colors">Books</Link>
-            <Link to="/category/Health & Beauty" className="whitespace-nowrap hover:text-sayebo-pink-300 transition-colors">Health & Beauty</Link>
-            <Link to="/category/Toys" className="whitespace-nowrap hover:text-sayebo-pink-300 transition-colors">Toys</Link>
+            <Link to="/category/Electronics" className="whitespace-nowrap hover:text-sayebo-orange-200 transition-colors">Electronics</Link>
+            <Link to="/category/Fashion" className="whitespace-nowrap hover:text-sayebo-orange-200 transition-colors">Fashion</Link>
+            <Link to="/category/Home & Garden" className="whitespace-nowrap hover:text-sayebo-orange-200 transition-colors">Home & Garden</Link>
+            <Link to="/category/Sports" className="whitespace-nowrap hover:text-sayebo-orange-200 transition-colors">Sports</Link>
+            <Link to="/category/Books" className="whitespace-nowrap hover:text-sayebo-orange-200 transition-colors">Books</Link>
+            <Link to="/category/Health & Beauty" className="whitespace-nowrap hover:text-sayebo-orange-200 transition-colors">Health & Beauty</Link>
+            <Link to="/category/Toys" className="whitespace-nowrap hover:text-sayebo-orange-200 transition-colors">Toys</Link>
           </div>
         </div>
       </nav>

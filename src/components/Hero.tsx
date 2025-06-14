@@ -5,12 +5,12 @@ import { Link } from 'react-router-dom';
 
 export const Hero = () => {
   return (
-    <div className="relative bg-gradient-to-br from-sayebo-pink-50 via-white to-sayebo-orange-50 overflow-hidden">
+    <div className="relative bg-gradient-to-br from-sayebo-pink-50 via-white to-sayebo-orange-50 overflow-hidden pt-32">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       
       {/* Main Hero Section */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="text-center lg:text-left">
@@ -19,7 +19,7 @@ export const Hero = () => {
               South Africa's #1 Online Marketplace
             </div>
             
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Shop Smart with{' '}
               <span className="bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 bg-clip-text text-transparent">
                 Sayebo
@@ -42,7 +42,7 @@ export const Hero = () => {
               </Link>
               
               <Link 
-                to="/seller/dashboard"
+                to="/seller-dashboard"
                 className="inline-flex items-center px-8 py-4 bg-white text-sayebo-pink-600 font-semibold rounded-xl border-2 border-sayebo-pink-200 hover:bg-sayebo-pink-50 transition-all duration-300"
               >
                 Become a Seller
