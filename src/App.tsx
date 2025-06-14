@@ -46,7 +46,7 @@ const App = () => (
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/contact" element={<Contact />} />
             
-            {/* Seller Routes - Use the new seller dashboard */}
+            {/* Seller Routes - Using the proper seller dashboard */}
             <Route path="/seller-dashboard" element={<SellerDashboard />} />
             <Route path="/seller-dashboard/*" element={<SellerDashboard />} />
             <Route path="/seller" element={<SellerDashboard />} />
