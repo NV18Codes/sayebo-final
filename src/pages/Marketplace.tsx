@@ -19,6 +19,7 @@ interface Product {
   category: string;
   description: string;
   stock: number;
+  created_at: string;
   profiles: {
     first_name: string;
     last_name: string;

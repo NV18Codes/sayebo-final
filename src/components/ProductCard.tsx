@@ -1,8 +1,11 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../integrations/supabase/client';
+import { useToast } from '../hooks/use-toast';
 
 interface Product {
   id: string;
@@ -20,15 +23,98 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      checkWishlistStatus();
+    }
+  }, [user, product.id]);
+
+  const checkWishlistStatus = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('wishlist')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('product_id', product.id)
+        .single();
+
+      setIsInWishlist(!!data);
+    } catch (error) {
+      // Item not in wishlist
+      setIsInWishlist(false);
+    }
+  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     addToCart(product.id);
   };
 
-  const handleWishlist = (e: React.MouseEvent) => {
+  const handleWishlist = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    console.log('Added to wishlist:', product.title);
+    
+    if (!user) {
+      toast({
+        title: "Login required",
+        description: "Please log in to add items to your wishlist",
+        variant: "destructive"
+      });
+      navigate('/login');
+      return;
+    }
+
+    setWishlistLoading(true);
+
+    try {
+      if (isInWishlist) {
+        // Remove from wishlist
+        const { error } = await supabase
+          .from('wishlist')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('product_id', product.id);
+
+        if (error) throw error;
+
+        setIsInWishlist(false);
+        toast({
+          title: "Removed from wishlist",
+          description: "Product removed from your wishlist"
+        });
+      } else {
+        // Add to wishlist
+        const { error } = await supabase
+          .from('wishlist')
+          .insert({
+            user_id: user.id,
+            product_id: product.id
+          });
+
+        if (error) throw error;
+
+        setIsInWishlist(true);
+        toast({
+          title: "Added to wishlist",
+          description: "Product added to your wishlist"
+        });
+      }
+    } catch (error) {
+      console.error('Error updating wishlist:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update wishlist",
+        variant: "destructive"
+      });
+    } finally {
+      setWishlistLoading(false);
+    }
   };
 
   return (
@@ -45,12 +131,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         
         <button
           onClick={handleWishlist}
+          disabled={wishlistLoading}
           className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 group-hover:scale-110"
         >
-          <Heart className="w-5 h-5 text-gray-400 hover:text-pink-400 hover:fill-pink-400 transition-colors" />
+          <Heart className={`w-5 h-5 transition-colors ${
+            isInWishlist 
+              ? 'text-sayebo-pink-500 fill-sayebo-pink-500' 
+              : 'text-gray-400 hover:text-sayebo-pink-400 hover:fill-sayebo-pink-400'
+          }`} />
         </button>
 
-        <div className="absolute top-3 left-3 bg-pink-400 text-white px-3 py-1 rounded-full text-sm font-medium">
+        <div className="absolute top-3 left-3 bg-sayebo-pink-400 text-white px-3 py-1 rounded-full text-sm font-medium">
           {product.category}
         </div>
 
@@ -58,7 +149,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <button
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className="w-full bg-pink-400 text-white py-2 rounded-lg font-medium hover:bg-pink-500 transition-colors flex items-center justify-center space-x-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full bg-sayebo-pink-400 text-white py-2 rounded-lg font-medium hover:bg-sayebo-pink-500 transition-colors flex items-center justify-center space-x-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             <ShoppingCart className="w-4 h-4" />
             <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
@@ -67,7 +158,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-pink-400 transition-colors line-clamp-2">
+        <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-sayebo-pink-400 transition-colors line-clamp-2">
           {product.title}
         </h3>
         
@@ -91,7 +182,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-pink-400">
+            <span className="text-2xl font-bold text-sayebo-pink-400">
               R{product.price.toLocaleString()}
             </span>
           </div>

@@ -20,6 +20,8 @@ import SellerDashboard from './pages/SellerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
+import Wishlist from './pages/Wishlist';
+import OrderTracking from './pages/OrderTracking';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,12 +51,13 @@ function App() {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/orders" element={<Profile />} />
+                <Route path="/order/:orderId" element={<OrderTracking />} />
+                <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/seller" element={<SellerDashboard />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/about" element={<Contact />} />
                 <Route path="/offers" element={<ProductListing />} />
-                <Route path="/wishlist" element={<ProductListing />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster />
