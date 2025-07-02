@@ -1,30 +1,14 @@
-
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Package, 
-  ShoppingCart, 
-  TrendingUp, 
-  Settings, 
-  Tag,
-  FileText,
-  Bell,
-  LogOut
-} from 'lucide-react';
+import { LayoutDashboard, Users, Package, TrendingUp, ShoppingCart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Analytics', href: '/admin/analytics', icon: TrendingUp },
+  { name: 'Sellers', href: '/admin/sellers', icon: ShoppingCart },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Products', href: '/admin/products', icon: Package },
-  { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
-  { name: 'Categories', href: '/admin/categories', icon: Tag },
-  { name: 'Analytics', href: '/admin/analytics', icon: TrendingUp },
-  { name: 'Reports', href: '/admin/reports', icon: FileText },
-  { name: 'Notifications', href: '/admin/notifications', icon: Bell },
-  { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export const AdminSidebar = () => {
@@ -55,7 +39,6 @@ export const AdminSidebar = () => {
         {navigation.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.href;
-          
           return (
             <Link
               key={item.name}
@@ -74,15 +57,12 @@ export const AdminSidebar = () => {
       </nav>
 
       {/* Logout */}
-      <div className="p-4 border-t border-gray-200">
-        <button
-          onClick={handleSignOut}
-          className="w-full flex items-center px-4 py-3 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-        >
-          <LogOut className="w-5 h-5 mr-3" />
-          Sign Out
-        </button>
-      </div>
+      <button
+        onClick={handleSignOut}
+        className="w-full flex items-center px-4 py-3 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+      >
+        Sign Out
+      </button>
     </div>
   );
 };

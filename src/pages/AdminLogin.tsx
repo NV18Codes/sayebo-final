@@ -1,10 +1,14 @@
-
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Shield, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../hooks/useProfile';
 import { useToast } from '../hooks/use-toast';
+
+// Dummy admin credentials for testing
+const ALLOWED_ADMIN_EMAILS = [
+  'admin@example.com', // Dummy admin email for testing
+];
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -29,12 +33,11 @@ const AdminLogin = () => {
 
       // Check if user is admin after successful login
       setTimeout(() => {
+        if (!ALLOWED_ADMIN_EMAILS.includes(email.toLowerCase())) {
+          navigate('/');
+          return;
+        }
         if (profile?.role !== 'admin') {
-          toast({
-            title: "Access Denied",
-            description: "You don't have administrator privileges",
-            variant: "destructive"
-          });
           navigate('/');
         } else {
           toast({
