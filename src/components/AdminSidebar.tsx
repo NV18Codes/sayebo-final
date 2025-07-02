@@ -29,7 +29,7 @@ export const AdminSidebar = () => {
           </div>
           <div className="ml-3">
             <h1 className="text-xl font-bold text-gray-900">Sayebo Admin</h1>
-            <p className="text-sm text-gray-500">Admin Portal</p>
+            <p className="text-sm text-gray-500">Admin Panel</p>
           </div>
         </div>
       </div>
