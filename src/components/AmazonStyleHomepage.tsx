@@ -2,7 +2,7 @@
 import { ProductRecommendations } from './ProductRecommendations';
 import { TodaysDeals } from './TodaysDeals';
 import { Categories } from './Categories';
-import { Promotions } from './Promotions';
+//import { Promotions } from './Promotions';
 import { Hero } from './Hero';
 
 export const AmazonStyleHomepage = () => {
@@ -18,8 +18,8 @@ export const AmazonStyleHomepage = () => {
         {/* Categories */}
         <Categories />
 
-        {/* Promotions */}
-        <Promotions />
+        {/* Promotions 
+        <Promotions />*/}
 
         {/* Product Recommendations */}
         <ProductRecommendations 

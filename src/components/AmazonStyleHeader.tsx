@@ -27,7 +27,12 @@ export const AmazonStyleHeader = () => {
           <div className="flex items-center space-x-4">
             {user ? (
               <>
-                <span className="hidden md:inline text-gray-700">Hello, {user.email}</span>
+                <span
+                  className="hidden md:inline text-gray-700 cursor-pointer hover:text-sayebo-pink-500"
+                  onClick={() => window.location.href = '/profile'}
+                >
+                  Hello, {user.email}
+                </span>
                 {profile?.role === 'seller' && (
                   <>
                     <span className="hidden md:inline text-gray-400">|</span>

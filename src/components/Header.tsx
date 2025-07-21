@@ -115,6 +115,7 @@ export const Header = () => {
 
             {/* User Account */}
             {user ? <div className="relative">
+
                 <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="profile-button flex items-center space-x-3 p-2 text-gray-700 hover:text-sayebo-pink-500 transition-colors rounded-full hover:bg-sayebo-pink-50 group">
                   <div className="w-9 h-9 bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 rounded-full flex items-center justify-center shadow-md">
                     <User className="w-5 h-5 text-white" />
@@ -123,14 +124,12 @@ export const Header = () => {
                       {profile.first_name}
                     </span>}
                 </button>
-
                 {/* Profile Dropdown */}
                 {isProfileOpen && <div className="profile-dropdown absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden">
                     <div className="px-4 py-4 border-b border-gray-100 bg-gradient-to-r from-sayebo-pink-50 to-sayebo-orange-50">
                       <p className="text-sm font-semibold text-gray-800">{profile?.first_name} {profile?.last_name}</p>
                       <p className="text-xs text-gray-500">{user.email}</p>
                     </div>
-                    
                     <Link to="/profile" className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors" onClick={() => setIsProfileOpen(false)}>
                       <User className="w-4 h-4 mr-3" />
                       My Profile
@@ -139,36 +138,28 @@ export const Header = () => {
                       <Package className="w-4 h-4 mr-3" />
                       My Orders
                     </Link>
-                    <Link to="/wishlist" className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors" onClick={() => setIsProfileOpen(false)}>
-                      <Heart className="w-4 h-4 mr-3" />
-                      Wishlist
-                    </Link>
-                    
                     {profile?.role === 'seller' && <Link to="/seller-dashboard" className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors" onClick={() => setIsProfileOpen(false)}>
                         <Shield className="w-4 h-4 mr-3" />
                         Seller Dashboard
                       </Link>}
-                    
                     {profile?.role === 'admin' && <Link to="/admin/dashboard" className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-sayebo-pink-50 hover:text-sayebo-pink-600 transition-colors" onClick={() => setIsProfileOpen(false)}>
                         <Shield className="w-4 h-4 mr-3" />
                         Admin Dashboard
                       </Link>}
-                    
                     <hr className="my-2 border-gray-100" />
                     <button onClick={handleSignOut} className="w-full flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
                       <LogOut className="w-4 h-4 mr-3" />
                       Sign Out
                     </button>
                   </div>}
-              </div> : <div className="flex items-center space-x-4">
+                  </div> : <div className="flex items-center space-x-4">
                 <Link to="/login" className="text-gray-700 hover:text-sayebo-pink-500 transition-colors font-medium px-4 py-2 rounded-full hover:bg-sayebo-pink-50">
                   Sign In
                 </Link>
                 <Link to="/register" className="bg-gradient-to-r from-sayebo-pink-500 to-sayebo-orange-500 text-white px-6 py-2.5 rounded-full hover:shadow-lg transition-all duration-300 font-medium transform hover:scale-105">
                   Sign Up
                 </Link>
-              </div>}
-
+                </div>}
             {/* Mobile Menu Button */}
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="menu-button lg:hidden p-2 text-gray-700 hover:text-sayebo-pink-500 transition-colors rounded-full hover:bg-sayebo-pink-50">
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
