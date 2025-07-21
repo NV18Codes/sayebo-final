@@ -1,9 +1,22 @@
 
 import React from 'react';
 import { ArrowRight, ShoppingBag, Truck, Shield, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Hero = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleBecomeSeller = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (!user) {
+      navigate('/login');
+    } else {
+      navigate('/seller-dashboard');
+    }
+  };
+
   return (
     <div className="relative bg-gradient-to-br from-orange-50 via-white to-pink-50 overflow-hidden pt-32">
       {/* Background Pattern */}
@@ -41,12 +54,13 @@ export const Hero = () => {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
               
-              <Link 
-                to="/seller-dashboard"
+              {/* Replace Link with button for Become a Seller */}
+              <button
+                onClick={handleBecomeSeller}
                 className="inline-flex items-center px-8 py-4 bg-white text-orange-600 font-semibold rounded-xl border-2 border-orange-200 hover:bg-orange-50 transition-all duration-300"
               >
                 Become a Seller
-              </Link>
+              </button>
             </div>
           </div>
           

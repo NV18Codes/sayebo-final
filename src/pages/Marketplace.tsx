@@ -160,18 +160,19 @@ const Marketplace = () => {
             <aside className="hidden lg:block w-64 bg-white rounded-lg shadow-sm p-6 h-fit sticky top-24">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Categories</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4"></h3>
                   <CategoryFilter
                     selectedCategory={selectedCategory}
                     onCategoryChange={setSelectedCategory}
+                    className="w-full"
                   />
                 </div>
-                
                 <div>
                   <PriceFilter
                     minPrice={0}
                     maxPrice={Math.max(...products.map(p => p.price), 10000)}
                     onPriceChange={handlePriceChange}
+                    className="w-full"
                   />
                 </div>
               </div>

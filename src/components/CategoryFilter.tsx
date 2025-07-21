@@ -41,7 +41,7 @@ export const CategoryFilter = ({ selectedCategory, onCategoryChange, className =
   return (
     <div className={className}>
       {/* Desktop Category Sidebar */}
-      <div className="hidden lg:block w-64 bg-white rounded-lg shadow-sm p-6">
+      <div className="hidden lg:block w-full">
         <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
           <Filter className="w-4 h-4 mr-2" />
           Categories

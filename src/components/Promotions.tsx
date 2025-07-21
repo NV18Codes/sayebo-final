@@ -1,4 +1,5 @@
 
+{/* Newsletter/promotions 
 import { useState, useEffect } from 'react';
 import { Tag, Clock, Star, TrendingUp } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
@@ -167,7 +168,6 @@ export const Promotions = () => {
         ))}
       </div>
 
-      {/* Newsletter Signup for Promotions */}
       <div className="bg-gradient-to-r from-pink-50 to-orange-50 rounded-lg p-6 border">
         <div className="text-center">
           <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -191,3 +191,4 @@ export const Promotions = () => {
     </div>
   );
 };
+*/}

@@ -6,6 +6,7 @@ import { ProductCard } from '../components/ProductCard';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { Grid, List, Search } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
+import { PriceFilter } from '../components/PriceFilter';
 
 interface Product {
   id: string;
@@ -25,6 +26,7 @@ const ProductListing = () => {
   const [sortBy, setSortBy] = useState('title');
   const [selectedCategory, setSelectedCategory] = useState(category || '');
   const [searchQuery, setSearchQuery] = useState('');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 });
 
   useEffect(() => {
     fetchProducts();
@@ -38,7 +40,7 @@ const ProductListing = () => {
 
   useEffect(() => {
     filterProducts();
-  }, [products, selectedCategory, searchQuery]);
+  }, [products, selectedCategory, searchQuery, priceRange]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -52,6 +54,13 @@ const ProductListing = () => {
 
       if (error) throw error;
       setProducts(data || []);
+      // Set initial price range based on products
+      if (data && data.length > 0) {
+        const prices = data.map(p => p.price);
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        setPriceRange({ min: minPrice, max: maxPrice });
+      }
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
@@ -76,6 +85,11 @@ const ProductListing = () => {
         product.category.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
+
+    // Price range filter
+    filtered = filtered.filter(product =>
+      product.price >= priceRange.min && product.price <= priceRange.max
+    );
 
     // Sort products
     filtered.sort((a, b) => {
@@ -142,6 +156,14 @@ const ProductListing = () => {
                     className="w-full pl-10 pr-4 py-2 border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
                   />
                   <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                </div>
+                {/* Price Range Filter */}
+                <div className="w-full md:w-72">
+                  <PriceFilter
+                    minPrice={priceRange.min}
+                    maxPrice={priceRange.max}
+                    onPriceChange={(min, max) => setPriceRange({ min, max })}
+                  />
                 </div>
 
                 <div className="flex items-center space-x-4">

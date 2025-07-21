@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
 import { User, Mail, Phone, MapPin, Calendar, Edit3, Save, Camera, Shield, Package, Heart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,6 +18,21 @@ const Profile = () => {
     last_name: profile?.last_name || '',
     phone: profile?.phone || '',
   });
+  const [wishlistCount, setWishlistCount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchWishlistCount = async () => {
+      if (!user) return;
+      const { count, error } = await supabase
+        .from('wishlist')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      if (!error && typeof count === 'number') {
+        setWishlistCount(count);
+      }
+    };
+    fetchWishlistCount();
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -100,7 +115,7 @@ const Profile = () => {
               <h1 className="text-3xl font-bold text-gray-800 mb-2">
                 {profile.first_name} {profile.last_name}
               </h1>
-              <p className="text-gray-600 mb-4">{user.email}</p>
+              <p className="text-gray-600 mb-4 break-words break-all max-w-full overflow-hidden whitespace-pre-line">{user.email}</p>
               <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                   profile.role === 'seller' 
@@ -152,8 +167,8 @@ const Profile = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Personal Information */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+          <div className="lg:col-span-2 flex flex-col h-full">
+            <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 h-full flex flex-col">
               <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
                 <User className="w-6 h-6 mr-3 text-sayebo-pink-500" />
                 Personal Information
@@ -233,38 +248,38 @@ const Profile = () => {
           </div>
 
           {/* Quick Actions & Stats */}
-          <div className="space-y-6">
+          <div className="space-y-6 h-full flex flex-col">
             {/* Account Stats */}
-            <div className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">Account Stats</h3>
-              <div className="space-y-4">
+            <div className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100 h-full flex flex-col justify-center gap-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                Account Stats
+              </h3>
+              <div className="flex-1 flex flex-col justify-center gap-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Calendar className="w-5 h-5 text-sayebo-pink-500" />
-                    <span className="text-sm text-gray-600">Member since</span>
+                    <span className="text-base text-gray-700 font-semibold">Member since</span>
                   </div>
-                  <span className="text-sm font-medium">
-                    {new Date(profile.created_at).toLocaleDateString()}
-                  </span>
+                  <span className="text-base font-medium text-gray-800">{new Date(profile.created_at).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Package className="w-5 h-5 text-blue-500" />
-                    <span className="text-sm text-gray-600">Total Orders</span>
+                    <span className="text-base text-gray-700 font-semibold">Total Orders</span>
                   </div>
-                  <span className="text-sm font-medium">12</span>
+                  <span className="text-base font-medium text-gray-800">12</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <Heart className="w-5 h-5 text-red-500" />
-                    <span className="text-sm text-gray-600">Wishlist Items</span>
+                    <span className="text-base text-gray-700 font-semibold">Wishlist Items</span>
                   </div>
-                  <span className="text-sm font-medium">5</span>
+                  <span className="text-base font-medium text-gray-800">{wishlistCount}</span>
                 </div>
               </div>
             </div>
 
-            {/* Quick Actions */}
+            {/* Quick Actions 
             <div className="bg-white rounded-3xl shadow-xl p-6 border border-gray-100">
               <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h3>
               <div className="space-y-3">
@@ -301,7 +316,7 @@ const Profile = () => {
                   </a>
                 )}
               </div>
-            </div>
+            </div>*/}
           </div>
         </div>
       </main>
