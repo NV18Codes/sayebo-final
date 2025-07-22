@@ -27,14 +27,6 @@ export const SellerHeader = () => {
               <Bell className="w-5 h-5" />
             </button>
 
-            {/* Settings */}
-            <Link 
-              to="/seller-dashboard/settings"
-              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Settings className="w-5 h-5" />
-            </Link>
-
             {/* User Menu */}
             <div className="flex items-center space-x-3">
               <div className="text-sm">
@@ -45,14 +37,6 @@ export const SellerHeader = () => {
               </div>
               
               <div className="flex items-center space-x-2">
-                <Link
-                  to="/"
-                  className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                  title="View Marketplace"
-                >
-                  <User className="w-5 h-5" />
-                </Link>
-                
                 <button
                   onClick={signOut}
                   className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"

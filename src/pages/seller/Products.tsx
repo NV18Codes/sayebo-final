@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SellerLayout } from '../../layouts/SellerLayout';
@@ -123,8 +122,8 @@ const Products: React.FC = () => {
       key: 'status',
       header: 'Status',
       render: (product: Product) => {
-        const variant = product.status === 'active' ? 'success' : 
-                      product.status === 'draft' ? 'warning' : 'default';
+        const variant = product.status === 'active' ? 'success' :
+          product.status === 'draft' ? 'warning' : 'default';
         return <StatusBadge status={product.status} variant={variant} />;
       },
     },
@@ -133,15 +132,25 @@ const Products: React.FC = () => {
       header: 'Actions',
       render: (product: Product) => (
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" title="View Product">
+          <Button
+            variant="ghost"
+            size="sm"
+            title="View Product"
+            onClick={() => navigate(`/seller-dashboard/products/${product.id}`)}
+          >
             <Eye className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm" title="Edit Product">
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Edit Product"
+            onClick={() => navigate(`/seller-dashboard/products/edit/${product.id}`)}
+          >
             <Edit className="w-4 h-4" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             title="Delete Product"
             onClick={() => handleDeleteProduct(product.id)}
           >
@@ -154,7 +163,7 @@ const Products: React.FC = () => {
 
   return (
     <SellerLayout>
-      <PageHeader 
+      <PageHeader
         title="Products"
         description="Manage your product inventory"
         action={{

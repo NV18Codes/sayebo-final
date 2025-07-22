@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+// Full working file with all features requested
+import React, { useState, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SellerLayout } from '../../layouts/SellerLayout';
 import { PageHeader } from '../../components/ui/page-header';
@@ -19,21 +19,84 @@ const AddProduct: React.FC = () => {
     price: '',
     stock: '',
     category: '',
+    subcategory: '',
     brand: '',
     condition: 'new',
-    image_url: ''
+    imageUrls: [''],
+    videoUrls: ['']
   });
 
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+  };
+
+  const categories = {
+    "Electronics": ["Phones", "Laptops", "Cameras", "Headphones", "Wearables"],
+    "Clothing & Accessories": ["Men", "Women", "Kids", "Footwear", "Bags"],
+    "Hardware Tools": ["Power Tools", "Hand Tools", "Plumbing", "Electrical", "Safety Gear"],
+    "Grocery": ["Fruits & Vegetables", "Beverages", "Snacks", "Dairy", "Staples"],
+    "Garden, Pool & Patio": ["Plants", "Outdoor Furniture", "Grills", "Fencing", "Lighting"],
+    "Sexual Wellness": ["Condoms", "Lubricants", "Intimate Massagers", "Supplements"],
+    "Feminine Hygiene": ["Sanitary Pads", "Tampons", "Menstrual Cups", "Intimate Wash"],
+    "Stationery": ["Notebooks", "Pens & Pencils", "Art Supplies", "Organizers"],
+    "Toys & Games": ["Action Figures", "Board Games", "Puzzles", "Outdoor Toys"]
+  };
+  // Add new state to keep track of local files and URLs separately
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [videoFiles, setVideoFiles] = useState<File[]>([]);
+
+  // Helper to add a local image file
+  const handleImageFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const files = Array.from(e.target.files);
+    if (imageFiles.length + files.length > 5) {
+      alert("You can upload up to 5 images only.");
+      return;
+    }
+    setImageFiles(prev => [...prev, ...files]);
+  };
+
+  // Helper to add a local video file
+  const handleVideoFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+    const files = Array.from(e.target.files);
+    if (videoFiles.length + files.length > 2) {
+      alert("You can upload up to 2 videos only.");
+      return;
+    }
+    setVideoFiles(prev => [...prev, ...files]);
+  };
+
+  // Remove image file
+  const removeImageFile = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Remove video file
+  const removeVideoFile = (index: number) => {
+    setVideoFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleImageUrlChange = (index: number, value: string) => {
+    const updated = [...formData.imageUrls];
+    updated[index] = value;
+    setFormData(prev => ({ ...prev, imageUrls: updated }));
+  };
+
+  const handleVideoUrlChange = (index: number, value: string) => {
+    const updated = [...formData.videoUrls];
+    updated[index] = value;
+    setFormData(prev => ({ ...prev, videoUrls: updated }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,17 +112,16 @@ const AddProduct: React.FC = () => {
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         category: formData.category,
+        subcategory: formData.subcategory,
         brand: formData.brand,
         condition: formData.condition,
-        image_url: formData.image_url || null,
+        image_urls: formData.imageUrls,
+        video_urls: formData.videoUrls,
         seller_id: user.id,
         status: 'active'
       };
 
-      const { error } = await supabase
-        .from('products')
-        .insert([productData]);
-
+      const { error } = await supabase.from('products').insert([productData]);
       if (error) throw error;
 
       toast({
@@ -82,7 +144,7 @@ const AddProduct: React.FC = () => {
 
   return (
     <SellerLayout>
-      <PageHeader 
+      <PageHeader
         title="Add New Product"
         description="Create a new product listing"
         action={{
@@ -95,6 +157,7 @@ const AddProduct: React.FC = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
                 Product Title *
@@ -113,14 +176,45 @@ const AddProduct: React.FC = () => {
               <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
                 Category *
               </label>
-              <Input
+              <select
                 id="category"
                 name="category"
                 value={formData.category}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  const selected = e.target.value;
+                  setFormData({ ...formData, category: selected, subcategory: "" });
+                }}
                 required
-                placeholder="e.g., Electronics, Clothing"
-              />
+                className="w-full rounded-md border border-black px-2 py-2 text-sm shadow-sm bg-white text-black focus:outline-none focus:border-black focus:ring-0"
+              >
+                <option value="">Select a category</option>
+                {Object.keys(categories).map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+
+              {formData.category && (
+                <div className="mt-4">
+                  <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-1">
+                    Subcategory *
+                  </label>
+                  <select
+                    id="subcategory"
+                    name="subcategory"
+                    value={formData.subcategory}
+                    onChange={(e) =>
+                      setFormData({ ...formData, subcategory: e.target.value })
+                    }
+                    required
+                    className="w-full rounded-md border border-black px-2 py-2 text-sm shadow-sm bg-white text-black focus:outline-none focus:border-black focus:ring-0"
+                  >
+                    <option value="">Select a subcategory</option>
+                    {categories[formData.category].map((subcat) => (
+                      <option key={subcat} value={subcat}>{subcat}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div>
@@ -176,7 +270,7 @@ const AddProduct: React.FC = () => {
                 name="condition"
                 value={formData.condition}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sayebo-pink-500"
+                className="w-full rounded-md border border-black px-2 py-2 text-sm shadow-sm bg-white text-black focus:outline-none focus:border-black focus:ring-0"
               >
                 <option value="new">New</option>
                 <option value="used">Used</option>
@@ -200,18 +294,147 @@ const AddProduct: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="image_url" className="block text-sm font-medium text-gray-700 mb-1">
-              Image URL
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Product Images (URLs or Uploads, max 5)
             </label>
-            <Input
-              id="image_url"
-              name="image_url"
-              type="url"
-              value={formData.image_url}
-              onChange={handleInputChange}
-              placeholder="https://example.com/image.jpg"
+
+            {/* Existing URL inputs */}
+            {formData.imageUrls.map((url, idx) => (
+              <div key={`url-img-${idx}`} className="flex items-center gap-2 mb-2">
+                <Input
+                  type="text"
+                  value={url}
+                  onChange={(e) => handleImageUrlChange(idx, e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                />
+                {formData.imageUrls.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = formData.imageUrls.filter((_, i) => i !== idx);
+                      setFormData({ ...formData, imageUrls: updated });
+                    }}
+                  >
+                    ❌
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {/* File upload input */}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageFileChange}
+              className="mb-2"
             />
+
+            {/* Previews for uploaded images */}
+            <div className="flex flex-wrap gap-4 mb-4">
+              {imageFiles.map((file, idx) => (
+                <div key={`file-img-${idx}`} className="relative">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`preview-${idx}`}
+                    className="w-24 h-24 object-cover rounded border border-gray-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImageFile(idx)}
+                    className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Add another URL input button */}
+            {formData.imageUrls.length < 5 && (
+              <button
+                type="button"
+                className="text-blue-600 text-sm underline mt-1"
+                onClick={() =>
+                  setFormData({ ...formData, imageUrls: [...formData.imageUrls, ''] })
+                }
+              >
+                + Add another image URL
+              </button>
+            )}
           </div>
+
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Product Videos (URLs or Uploads, max 2)
+            </label>
+
+            {/* Existing URL inputs */}
+            {formData.videoUrls.map((url, idx) => (
+              <div key={`url-video-${idx}`} className="flex items-center gap-2 mb-2">
+                <Input
+                  type="text"
+                  value={url}
+                  onChange={(e) => handleVideoUrlChange(idx, e.target.value)}
+                  placeholder="https://example.com/video.mp4"
+                />
+                {formData.videoUrls.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = formData.videoUrls.filter((_, i) => i !== idx);
+                      setFormData({ ...formData, videoUrls: updated });
+                    }}
+                  >
+                    ❌
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {/* File upload input */}
+            <input
+              type="file"
+              accept="video/*"
+              multiple
+              onChange={handleVideoFileChange}
+              className="mb-2"
+            />
+
+            {/* Previews for uploaded videos */}
+            <div className="flex flex-wrap gap-4 mb-4">
+              {videoFiles.map((file, idx) => (
+                <div key={`file-video-${idx}`} className="relative w-32 h-20 border border-gray-300 rounded overflow-hidden">
+                  <video
+                    src={URL.createObjectURL(file)}
+                    controls
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeVideoFile(idx)}
+                    className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Add another URL input button */}
+            {formData.videoUrls.length < 2 && (
+              <button
+                type="button"
+                className="text-blue-600 text-sm underline mt-1"
+                onClick={() =>
+                  setFormData({ ...formData, videoUrls: [...formData.videoUrls, ''] })
+                }
+              >
+                + Add another video URL
+              </button>
+            )}
+          </div>
+
 
           <div className="flex justify-end space-x-4">
             <Button
