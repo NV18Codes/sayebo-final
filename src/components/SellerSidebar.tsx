@@ -10,7 +10,8 @@ import {
   Users,
   MessageCircle,
   FileText,
-  X
+  X,
+  StarIcon
 } from 'lucide-react';
 
 const navigation = [
@@ -18,9 +19,9 @@ const navigation = [
   { name: 'Products', href: '/seller-dashboard/products', icon: Package },
   { name: 'Orders', href: '/seller-dashboard/orders', icon: ShoppingBag },
   { name: 'Analytics', href: '/seller-dashboard/analytics', icon: TrendingUp },
-  { name: 'Customers', href: '/seller-dashboard/customers', icon: Users },
-  { name: 'Messages', href: '/seller-dashboard/messages', icon: MessageCircle },
-  { name: 'Reports', href: '/seller-dashboard/reports', icon: FileText },
+  { name: 'Customers', href: '/seller-dashboard/customer', icon: Users },
+  { name: 'Review & Ratings', href: '/seller-dashboard/review&rating', icon: StarIcon },
+  { name: 'Reports', href: '/seller-dashboard/report', icon: FileText },
   { name: 'Settings', href: '/seller-dashboard/settings', icon: Settings },
 ];
 
@@ -32,7 +33,7 @@ export const SellerSidebar: React.FC<SellerSidebarProps> = ({ onClose }) => {
   const location = useLocation();
 
   return (
-    <aside className="h-full w-64 bg-white shadow-lg border-r border-gray-200">
+<aside className="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] bg-white shadow-inner border-r border-gray-200 overflow-y-auto z-30">
       <div className="flex flex-col h-full">
         {/* Mobile close button */}
         {onClose && (
